@@ -1,0 +1,7 @@
+## read logs from systemd
+user ALL=NOPASSWD: /bin/journalctl -n 200 -u tor@default.service
+
+## tor commands
+user ALL=NOPASSWD: /bin/systemctl reload tor@default.service
+user ALL=NOPASSWD: /bin/systemctl stop tor@default.service
+user ALL=NOPASSWD: /bin/systemctl restart tor@default.service
