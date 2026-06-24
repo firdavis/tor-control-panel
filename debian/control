@@ -15,7 +15,7 @@ Rules-Requires-Root: no
 
 Package: tor-control-panel
 Architecture: all
-Depends: helper-scripts,
+Depends:
          pkexec,
          mate-polkit,
          python3,
