@@ -12,7 +12,7 @@ else:
 
 ## TODO: code duplication
 ## Should use same variable as in anon_connection_wizard.py.
-torrc_file_path = '/usr/local/etc/torrc.d/40_tor_control_panel.conf'
+torrc_file_path = '/etc/torrc.d/20_default_torrc.conf'
 acw_comm_file_path = '/run/anon-connection-wizard/tor.conf'
 
 
