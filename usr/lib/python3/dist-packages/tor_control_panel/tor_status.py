@@ -79,14 +79,14 @@ def set_enabled():
 
     write_to_temp_then_move(content)
 
-    command = 'leaprun acw-tor-control-restart'
+    command = 'sudo /bin/systemctl restart tor@default.service'
     tor_status_code = subprocess.call(command, shell=True)
 
     if tor_status_code != 0:
         return 'cannot_connect', tor_status_code
 
     ## we have to reload to open /run/tor/control and create /run/tor/control.authcookie
-    command = 'leaprun acw-tor-control-reload'
+    command = 'sudo /bin/systemctl status tor@default.service'
     subprocess.call(command, shell=True)
 
     command = 'leaprun acw-tor-control-status'
@@ -131,7 +131,7 @@ def set_disabled():
 
     write_to_temp_then_move(content)
 
-    command = 'leaprun acw-tor-control-stop'
+    command = 'sudo bin/systemctl stop tor@default.service'
     subprocess.call(command, shell=True)
 
     return 'tor_disabled'
