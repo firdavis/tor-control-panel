@@ -170,8 +170,7 @@ def newnym_text():
     text = '''
 <p>Use a fresh Tor route for <b>new</b> connections. This asks Tor to build new circuits, \
 so future connections might take a different path (and might use a different Tor exit relay).</p> \
-<p>Technically, this sends signal NEWNYM to Tor. For more informaton, see \
-<a href="https://www.whonix.org/wiki/Stream_Isolation/Easy">Stream Isolation: Easy<a/>
+<p>Technically, this sends signal NEWNYM to Tor.
 '''
     return text.strip()
 
@@ -193,7 +192,25 @@ def torrc_text():
 #    1. This file can be easily overwritten by tor-control-panel.
 #    2. Even a single character change in this file may cause errors.
 # However, deleting this file is fine, since a new plain file will be generated the next time 
-#  you run tor-control-panel.
+# you run tor-control-panel.
+
+RunAsDaemon 1
+
+## Run a SOCKS5 proxy on port 9050
+SOCKSPort 127.0.0.1:9050
+## Optional but recommended: stream isolation
+SOCKSPort 127.0.0.1:9150 IsolateDestAddr IsolateDestPort
+## DNS resolution through Tor
+DNSPort 127.0.0.1:5353
+## Control port for Tor controller tools
+ControlPort 9051
+## Cookie authentication for control port
+CookieAuthentication 1
+
+## Tor logging
+Log notice file /run/tor/log
+
+DisableNetwork 0
 '''
     return text.strip()
 

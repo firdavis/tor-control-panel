@@ -10,7 +10,7 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QCursor, QTextCursor
 from PyQt5.QtWidgets import *
-
+import subprocess
 from subprocess import call, Popen, PIPE
 
 import os
@@ -21,16 +21,18 @@ import tempfile
 from . import tor_status, tor_bootstrap, torrc_gen, info
 
 
+
 class TorControlPanel(QDialog):
     def __init__(self):
         super(TorControlPanel, self).__init__()
 
         self.setMinimumSize(650, 465)
+        self.setWindowFlag(Qt.WindowMinimizeButtonHint)
+        self.setWindowFlag(Qt.WindowMaximizeButtonHint)
 
         icons_path = '/usr/share/tor-control-panel/'
         self.refresh_icon = QtGui.QIcon(icons_path + 'refresh.png')
         self.exit_icon = QtGui.QIcon(icons_path + 'Exit.png')
-
         self.restart_icon = QtGui.QIcon(icons_path + 'restart.png')
         self.stop_icon = QtGui.QIcon(icons_path + 'stop.png')
         self.tool_icon = QtGui.QIcon(icons_path + 'tools.png')
@@ -48,27 +50,35 @@ class TorControlPanel(QDialog):
         self.message = ''
         self.tor_message = info.tor_stopped()
         self.tor_running_path = '/run/tor/tor.pid'
+        tcp_comm_file_path = '/run/tor-control-panel/tor.conf'
         self.torrc_file_path =  '/etc/torrc.d/20_default_torrc.conf'
 
-        self.button_name = ['systemd &journal', 'Tor &log', '&torrc']
+        # Make sure torrc exists, otherwise write default torrc.
+        if os.path.exists(self.torrc_file_path):
+            pass
+        else:
+            args = ['None', 'None', 'None']
+            torrc_gen.gen_torrc(args)
 
-        self.journal_command = 'sudo journalctl -n 200 -u tor@default.service'
+        self.button_name = ['systemd &journal', 'Tor &log', '&torrc']
+        # subprocess.run only accepts a list of strings.
+        self.journal_command = ['sudo', 'journalctl', '-n', '200', '-u', 'tor@default.service']
 
         self.bridges = ['None',
-                        'obfs4',
-                        'snowflake',
-                        'meek',
-                        'Custom bridges']
-
-        self.default_bridges = ['None',
                                 'obfs4',
                                 'snowflake',
-                                'meek']
+                                'meek',
+                                'Custom bridges']
+
+        self.default_bridges = ['None',
+                                             'obfs4',
+                                             'snowflake',
+                                             'meek']
 
         self.proxies = ['None',
-                        'HTTP / HTTPS',
-                        'SOCKS4',
-                        'SOCKS5']
+                                'HTTP / HTTPS',
+                                'SOCKS4',
+                                'SOCKS5']
 
         self.use_default_bridges = False
         self.use_custom_bridges = False
@@ -692,6 +702,8 @@ class TorControlPanel(QDialog):
                     p = Popen(self.journal_command, stdout=PIPE, stderr=PIPE)
                     stdout, stderr = p.communicate()
                     text = stdout.decode()
+                    self.file_browser.setText(text)
+                    self.file_browser.moveCursor(QtGui.QTextCursor.End)
 
                 # Get n last lines from Tor log, HTML format for highlighting
                 # warnings and errors, write to file for text browser.
@@ -713,16 +725,18 @@ class TorControlPanel(QDialog):
 
                         with open(self.tor_log_html, 'r') as f:
                             text = f.read()
+                            self.file_browser.setText(text)
+                            self.file_browser.moveCursor(QtGui.QTextCursor.End)
 
                     else:
                         text = 'Something is wrong: directory /run/tor does not exists. Try to restart Tor.'
 
                 elif button.text() == self.button_name[2]:
-                    with open(torrc_gen.torrc_path()) as f:
+                    with open(self.torrc_file_path, 'r') as f:
                         text = f.read()
+                        self.file_browser.setText(text)
+                        self.file_browser.moveCursor(QtGui.QTextCursor.Start)
 
-                self.file_browser.setText(text)
-                self.file_browser.moveCursor(QtGui.QTextCursor.End)
 
     def refresh_user_configuration(self):
         args = torrc_gen.parse_torrc()

@@ -13,7 +13,7 @@ else:
 ## TODO: code duplication
 ## Should use same variable as in anon_connection_wizard.py.
 torrc_file_path = '/etc/torrc.d/20_default_torrc.conf'
-acw_comm_file_path = '/run/anon-connection-wizard/tor.conf'
+tcp_comm_file_path = '/run/tor-control-panel/tor.conf'
 
 
 def tor_status():
@@ -89,7 +89,7 @@ def set_enabled():
     command = 'sudo /bin/systemctl status tor@default.service'
     subprocess.call(command, shell=True)
 
-    command = 'leaprun acw-tor-control-status'
+    command =  'sudo /bin/systemctl status tor@default.service'
     tor_status_code = subprocess.call(command, shell=True)
 
     if tor_status_code != 0:
@@ -139,10 +139,10 @@ def set_disabled():
 def write_to_temp_then_move(content):
     print("before:")
     cat(torrc_file_path)
-    cat(acw_comm_file_path)
+    cat(tcp_comm_file_path)
     print(f"content to write: '{content}'")
 
-    with open(acw_comm_file_path, 'w') as comm_file:
+    with open(tcp_comm_file_path, 'w') as comm_file:
         ## Using flock here prevents another anon-connection-wizard process
         ## from trying to write to the file until acw-write-torrc is finished
         ## processing it.
@@ -151,9 +151,9 @@ def write_to_temp_then_move(content):
         ## No need to unlock, acw-write-torrc deletes the original file.
 
     print("after 1:")
-    cat(acw_comm_file_path)
+    cat(tcp_comm_file_path)
 
-    command = ['leaprun', 'acw-write-torrc']
+    command = ['usr/libexec/tor-control-panel/acw-write-torrc']
     print("tor_status.py: executing:", ' '.join(command))
     subprocess.check_call(command)
 

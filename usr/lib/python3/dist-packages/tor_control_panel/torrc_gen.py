@@ -3,20 +3,23 @@
 ## Copyright (C) 2018 - 2025 ENCRYPTED SUPPORT LLC <adrelanos@whonix.org>
 ## See the file COPYING for copying conditions.
 
+import sys
 import json
 import os
+
+from pathlib import Path
+import subprocess
 from subprocess import call
 
 from . import info
-from .edit_etc_resolv_conf import edit_etc_resolv_conf_add
-from .tor_status import write_to_temp_then_move
+# from .tor_status import write_to_temp_then_move
 
 whonix = os.path.exists('/usr/share/anon-gw-base-files/gateway')
 
 torrc_file_path = '/etc/torrc.d/20_default_torrc.conf'
 torrc_user_file_path = '/usr/local/etc/torrc.d/50_user.conf'
 
-bridges_default_path = '/usr/share/anon-connection-wizard/bridges_default'
+bridges_default_path = '/usr/share/tor-control-panel/bridges_default'
 
 command_useBridges = 'UseBridges 1\n'
 
@@ -41,9 +44,7 @@ proxy_auth = ['HTTPSProxyAuthenticator',
               'Socks5ProxyUsername',
               'Socks5ProxyPassword']
 
-
-def torrc_path():
-    return torrc_file_path
+torrc_file_path =  '/etc/torrc.d/20_default_torrc.conf'
 
 def user_path():
     return torrc_user_file_path
@@ -55,7 +56,7 @@ def gen_torrc(args):
     print(f"DEBUG custom_bridges frpmgentorrc : {custom_bridges}")
     proxy_type = str(args[2])  if len(args) > 2 else 'None'
 
-    torrc_content = ['%s# %s\n' % (info.torrc_text(), torrc_user_file_path), 'DisableNetwork 0\n']
+    torrc_content = ['%s#' % (info.torrc_text()), 'DisableNetwork 0\n']
 
     if not bridge_type == 'None':
         if bridge_type in bridges_type:
@@ -81,10 +82,11 @@ def gen_torrc(args):
     else:
         torrc_content.append('')
 
+    ### Not required with tor default installation.
     # Required for meek and snowflake only.
     # https://forums.whonix.org/t/censorship-circumvention-tor-pluggable-transports/2601/9
-    if bridge_type.startswith('meek') or bridge_type.startswith('snowflake'):
-        edit_etc_resolv_conf_add()
+    # if bridge_type.startswith('meek') or bridge_type.startswith('snowflake'):
+    #     edit_etc_resolv_conf_add()
 
     if proxy_type != 'None' and len(args) >= 7:
         proxy_ip = str(args[3])
@@ -107,15 +109,17 @@ def gen_torrc(args):
         torrc_content.append('')
 
     final_torrc_content = ''.join(torrc_content)
-    write_to_temp_then_move(final_torrc_content)
+    content =  final_torrc_content
 
+    # Synthesis of two AI
+    # Write torrc as root. It's a oneshot for a single file.
+    subprocess.run(
+        ["sudo", "tee", torrc_file_path],
+        input=content.encode(),
+        check=True
+    )
 
 def parse_torrc():
-    ## Make sure Torrc exists.
-    # command = 'leaprun tor-config-sane'
-    # call(command, shell=True)
-
-    # if os.path.exists(torrc_file_path):
     use_bridge = 'UseBridges' in open(torrc_file_path).read()
     use_custom_bridges = '# Custom briges are used' in open(torrc_file_path).read()
     use_proxy = 'Proxy' in open(torrc_file_path).read()
