@@ -13,7 +13,6 @@ else:
 ## TODO: code duplication
 ## Should use same variable as in anon_connection_wizard.py.
 torrc_file_path = '/etc/torrc.d/20_default_torrc.conf'
-tcp_comm_file_path = '/run/tor-control-panel/tor.conf'
 
 
 def tor_status():
@@ -77,7 +76,11 @@ def set_enabled():
         # else:
         #     content = 'DisableNetwork 0'
 
-    write_to_temp_then_move(content)
+    subprocess.run(
+        ["sudo", "tee", torrc_file_path],
+        input=content.encode(),
+        check=True
+    )
 
     command = 'sudo /bin/systemctl restart tor@default.service'
     tor_status_code = subprocess.call(command, shell=True)
@@ -129,56 +132,14 @@ def set_disabled():
         # else:
         #     content = 'DisableNetwork 1' + '\n'
 
-    write_to_temp_then_move(content)
+    subprocess.run(
+        ["sudo", "tee", torrc_file_path],
+        input=content.encode(),
+        check=True
+    )
 
     command = 'sudo bin/systemctl stop tor@default.service'
     subprocess.call(command, shell=True)
 
     return 'tor_disabled'
 
-def write_to_temp_then_move(content):
-    print("before:")
-    cat(torrc_file_path)
-    cat(tcp_comm_file_path)
-    print(f"content to write: '{content}'")
-
-    with open(tcp_comm_file_path, 'w') as comm_file:
-        ## Using flock here prevents another anon-connection-wizard process
-        ## from trying to write to the file until acw-write-torrc is finished
-        ## processing it.
-        fcntl.flock(comm_file, fcntl.LOCK_EX)
-        comm_file.write(content)
-        ## No need to unlock, acw-write-torrc deletes the original file.
-
-    print("after 1:")
-    cat(tcp_comm_file_path)
-
-    command = ['usr/libexec/tor-control-panel/acw-write-torrc']
-    print("tor_status.py: executing:", ' '.join(command))
-    subprocess.check_call(command)
-
-    print("after 2:")
-
-    cat(torrc_file_path)
-
-def cat(filename):
-    print(f"cat filename: '{filename}'")
-    if not os.path.exists(filename):
-        print(f"File did not exist: '{filename}'")
-        return
-    with open(filename, 'r') as file:
-        content = file.read()
-        if not content:
-            print(f"File is empty: '{filename}'")
-        else:
-            print(content, end='')  # content already has newlines
-    print("")
-
-## Debugging: Executing this script directly.
-if __name__ == "__main__":
-    # Example usage
-    print("Enabling...")
-    print(set_enabled())
-    print("Disabling...")
-    print(set_disabled())
-    print("Done.")

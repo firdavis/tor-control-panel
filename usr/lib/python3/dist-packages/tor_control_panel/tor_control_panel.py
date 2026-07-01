@@ -50,7 +50,6 @@ class TorControlPanel(QDialog):
         self.message = ''
         self.tor_message = info.tor_stopped()
         self.tor_running_path = '/run/tor/tor.pid'
-        tcp_comm_file_path = '/run/tor-control-panel/tor.conf'
         self.torrc_file_path =  '/etc/torrc.d/20_default_torrc.conf'
 
         # Make sure torrc exists, otherwise write default torrc.
