@@ -56,7 +56,7 @@ def gen_torrc(args):
     print(f"DEBUG custom_bridges frpmgentorrc : {custom_bridges}")
     proxy_type = str(args[2])  if len(args) > 2 else 'None'
 
-    torrc_content = ['%s' % (info.torrc_text())]
+    torrc_content = ['%s' % (info.torrc_text()), '\n']
 
     if not bridge_type == 'None':
         if bridge_type in bridges_type:

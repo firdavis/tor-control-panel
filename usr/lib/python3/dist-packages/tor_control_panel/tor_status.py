@@ -139,8 +139,8 @@ def set_disabled():
     )
 
     command = 'sudo bin/systemctl stop tor@default.service'
+    command = 'sudo bin/systemctl restart tor@default.service'
     subprocess.call(command, shell=True)
-    print("command = 'sudo bin/systemctl stop tor@default.service' was processed")
 
     return 'tor_disabled'
 
