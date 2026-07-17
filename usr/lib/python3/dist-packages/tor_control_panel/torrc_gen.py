@@ -111,8 +111,8 @@ def gen_torrc(args):
     final_torrc_content = ''.join(torrc_content)
     content =  final_torrc_content
 
-    # Synthesis of two AI
     # Write torrc as root. It's a oneshot for a single file.
+    # Ne need to change file permissions.
     subprocess.run(
         ["sudo", "tee", torrc_file_path],
         input=content.encode(),

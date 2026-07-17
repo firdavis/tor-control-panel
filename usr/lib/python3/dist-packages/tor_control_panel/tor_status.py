@@ -4,6 +4,7 @@
 ## See the file COPYING for copying conditions.
 
 import os, subprocess, fcntl
+from stem.control import Controller
 
 if os.path.exists('/usr/share/anon-gw-base-files/gateway'):
     whonix=True
@@ -56,7 +57,6 @@ def set_enabled():
 
     content = ''
 
-    # if os.path.exists(torrc_file_path):
     with open(torrc_file_path, 'r', encoding="utf-8") as f:
         content = f.readlines()
 
@@ -69,12 +69,11 @@ def set_enabled():
     if disable_network_found:
         with open(torrc_file_path,'r', encoding="utf-8") as f:
             content = f.read().replace('DisableNetwork 1', 'DisableNetwork 0')
+
     else:
         # if os.path.exists(torrc_file_path):
         with open(torrc_file_path,'r') as f:
             content = f.read() + '\n' + 'DisableNetwork 0' + '\n'
-        # else:
-        #     content = 'DisableNetwork 0'
 
     subprocess.run(
         ["sudo", "tee", torrc_file_path],
@@ -82,30 +81,12 @@ def set_enabled():
         check=True
     )
 
-    command = 'sudo /bin/systemctl restart tor@default.service'
-    tor_status_code = subprocess.call(command, shell=True)
+    with Controller.from_port(port=9051) as controller:
+        controller.authenticate()
+        controller.set_conf("DisableNetwork", "0")
 
-    if tor_status_code != 0:
-        return 'cannot_connect', tor_status_code
+    return 'tor_enabled'
 
-    ## we have to reload to open /run/tor/control and create /run/tor/control.authcookie
-    command = 'sudo /bin/systemctl status tor@default.service'
-    subprocess.call(command, shell=True)
-
-    command =  'sudo /bin/systemctl status tor@default.service'
-    tor_status_code = subprocess.call(command, shell=True)
-
-    if tor_status_code != 0:
-        return 'cannot_connect', tor_status_code
-
-    return 'tor_enabled', tor_status_code
-
-'''set_disabled() is specified as follows:
-set_disabled() will:
-1. guarantee the existence of 40_tor_control_panel.conf
-2. guarantee the final value of DisableNetwork is 1 in the file
-3. guarantee Tor uses DisableNetwork 1
-'''
 def set_disabled():
     print("set_disabled was called.")
 
@@ -126,11 +107,8 @@ def set_disabled():
             content = f.read().replace('DisableNetwork 0', 'DisableNetwork 1')
 
     else:
-        # if os.path.exists(torrc_file_path):
         with open(torrc_file_path,'r', encoding="utf-8") as f:
             content = f.read() + '\n' + 'DisableNetwork 1' + '\n'
-        # else:
-        #     content = 'DisableNetwork 1' + '\n'
 
     subprocess.run(
         ["sudo", "tee", torrc_file_path],
@@ -138,9 +116,9 @@ def set_disabled():
         check=True
     )
 
-    command = 'sudo bin/systemctl stop tor@default.service'
-    command = 'sudo bin/systemctl restart tor@default.service'
-    subprocess.call(command, shell=True)
+    with Controller.from_port(port=9051) as controller:
+        controller.authenticate()
+        controller.set_conf("DisableNetwork", "1")
 
     return 'tor_disabled'
 
