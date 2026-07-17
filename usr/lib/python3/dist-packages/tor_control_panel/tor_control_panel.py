@@ -771,7 +771,6 @@ class TorControlPanel(QDialog):
         if tor_is_enabled and tor_is_running:
             self.tor_status = 'running'
             tor_state = True
-            print(f"tor state 1, {tor_state}")
             ## when refresh is called from update_bootstrap, the thread
             ## would be destroyed while running, crashing the program.
             if bootstrap:
@@ -804,6 +803,7 @@ class TorControlPanel(QDialog):
         self.refresh_status()
         self.refresh_user_configuration()
         self.refresh_logs()
+
 
     def restart_tor(self):
         if not self.bootstrap_done:
