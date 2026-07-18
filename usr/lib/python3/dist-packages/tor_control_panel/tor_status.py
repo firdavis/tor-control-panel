@@ -39,19 +39,7 @@ def tor_status():
         print("tor_status status: tor_disabled")
         return "tor_disabled"
 
-'''Unlike tor_status() function which only shows the current state of the anon_connection_wizard.conf,
-set_enabled() and set_disabled() function will try to repair the missing torrc or DisableNetwork line.
-This makes sense because when we call set_enabled() or set_disabled() we really want Tor to work.
 
-set_enabled() will return a tuple with two value: a string of error type and an int of error code.
-'''
-
-'''set_enabled() is specified as follows:
-set_enabled() will:
-1. guarantee the existence of 40_tor_control_panel.conf
-2. guarantee the final value of DisableNetwork is 0 in the file
-3. guarantee Tor uses DisableNetwork 0
-'''
 def set_enabled():
     print("set_enabled was called.")
 
@@ -81,11 +69,16 @@ def set_enabled():
         check=True
     )
 
+    ## The DisableNetwork line is ignored in system tor torrc.
+    ## It is managed with SETCONF in the bundled tor in Tor Browser.
+    ## So, the use of stem.set_conf seems the simpest way to overcome the isssue.
+    ## Whonix does it a different way that was not explored.
     with Controller.from_port(port=9051) as controller:
         controller.authenticate()
         controller.set_conf("DisableNetwork", "0")
 
     return 'tor_enabled'
+
 
 def set_disabled():
     print("set_disabled was called.")
