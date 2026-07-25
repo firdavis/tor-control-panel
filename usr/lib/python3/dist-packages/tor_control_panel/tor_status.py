@@ -3,27 +3,16 @@
 ## Copyright (C) 2018 - 2025 ENCRYPTED SUPPORT LLC <adrelanos@whonix.org>
 ## See the file COPYING for copying conditions.
 
-import os, subprocess, fcntl
+import subprocess
 from stem.control import Controller
 
-if os.path.exists('/usr/share/anon-gw-base-files/gateway'):
-    whonix=True
-else:
-    whonix=False
-
-## TODO: code duplication
-## Should use same variable as in anon_connection_wizard.py.
 torrc_file_path = '/etc/torrc.d/20_default_torrc.conf'
 
 
 def tor_status():
     print("tor_status was called.")
 
-    # output = self.tor_enabled_check()  #subprocess.check_output('/usr/libexec/helper-scripts/tor_enabled_check')
-    # output = output.decode("UTF-8").strip()
-
     def tor_enabled_check():
-        # if os.path.exists(torrc_file_path):
         with open(torrc_file_path, 'r') as f:
             content = f.readlines()
             for line in content:
@@ -59,18 +48,20 @@ def set_enabled():
             content = f.read().replace('DisableNetwork 1', 'DisableNetwork 0')
 
     else:
-        # if os.path.exists(torrc_file_path):
         with open(torrc_file_path,'r') as f:
             content = f.read() + '\n' + 'DisableNetwork 0' + '\n'
 
+    ## Write torrc as root.
+    ## No need to change file permissions.
     subprocess.run(
         ["sudo", "tee", torrc_file_path],
         input=content.encode(),
         check=True
     )
 
-    ## The DisableNetwork line is ignored in system tor torrc.
-    ## It is managed with SETCONF in the bundled tor in Tor Browser.
+    ## When using system tor, the DisableNetwork line is ignored in torrc.
+    ## It is managed with SETCONF in the bundled Tor in Tor Browser,
+    ## switching ftom 1 to 0 when connecting to the network.
     ## So, the use of stem.set_conf seems the simpest way to overcome the isssue.
     ## Whonix does it a different way that was not explored.
     with Controller.from_port(port=9051) as controller:
@@ -85,7 +76,6 @@ def set_disabled():
 
     content = ''
 
-    # if os.path.exists(torrc_file_path):
     with open(torrc_file_path, 'r',  encoding="utf-8") as f:
         content = f.readlines()
 

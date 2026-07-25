@@ -28,6 +28,7 @@ class TorBootstrap(QThread):
         https://gitweb.torproject.org/tor-launcher.git/tree/src/chrome/locale/en/torlauncher.properties
         '''
         self.tag_phase = {'starting': 'Starting',
+                    'conn_proxy': 'Connecting to proxy',
                     'conn': 'Connecting to a relay',
                     'conn_dir': 'Connecting to a relay directory',
                     'conn_done_pt': "Connected to pluggable transport",
