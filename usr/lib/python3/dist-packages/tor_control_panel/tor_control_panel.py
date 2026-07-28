@@ -512,10 +512,20 @@ class TorControlPanel(QDialog):
             self.hide_custom_bridges()
             self.set_torrc()
 
+
+    # def valid_ip(ip):
+    #     import ipaddress
+    #     print(ip)
+    #     try:
+    #         ipaddress.ip_address(ip)
+    #         return True  # Valid IP
+    #     except ValueError:
+    #         return False  # Invalid IP
+
     def valid_ip(self, address):
         import socket
         try:
-            socket.gethostbyname(address)
+            socket.inet_aton(address)
             return True
         except socket.error:
             return False
@@ -530,6 +540,7 @@ class TorControlPanel(QDialog):
             return False
 
     def check_valid_proxy_settings(self):
+        print(self.proxy_ip_edit.text())
         return (self.valid_ip(self.proxy_ip_edit.text()) and
                 self.valid_port(self.proxy_port_edit.text()))
 
