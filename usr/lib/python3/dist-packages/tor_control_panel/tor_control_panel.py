@@ -512,16 +512,6 @@ class TorControlPanel(QDialog):
             self.hide_custom_bridges()
             self.set_torrc()
 
-
-    # def valid_ip(ip):
-    #     import ipaddress
-    #     print(ip)
-    #     try:
-    #         ipaddress.ip_address(ip)
-    #         return True  # Valid IP
-    #     except ValueError:
-    #         return False  # Invalid IP
-
     def valid_ip(self, address):
         import socket
         try:
