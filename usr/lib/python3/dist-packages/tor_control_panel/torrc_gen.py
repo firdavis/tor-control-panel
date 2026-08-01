@@ -3,13 +3,11 @@
 ## Copyright (C) 2018 - 2025 ENCRYPTED SUPPORT LLC <adrelanos@whonix.org>
 ## See the file COPYING for copying conditions.
 
-import sys
 import json
 import os
 
 from pathlib import Path
 import subprocess
-from subprocess import call
 
 from . import info
 
@@ -41,21 +39,17 @@ proxy_auth = ['HTTPSProxyAuthenticator',
               'Socks5ProxyUsername',
               'Socks5ProxyPassword']
 
-torrc_file_path =  '/etc/torrc.d/20_default_torrc.conf'
-
 def user_path():
     return torrc_user_file_path
 
 def gen_torrc(args):
     bridge_type = str(args[0]) if len(args) > 0 else 'None'
-    print(f"DEBUG bridge_type from gen_torrc : {bridge_type} ")
-    custom_bridges = str(args[1])  if len(args) > 1 else 'error-unknown-bridge-type'
-    print(f"DEBUG custom_bridges frpmgentorrc : {custom_bridges}")
-    proxy_type = str(args[2])  if len(args) > 2 else 'None'
+    custom_bridges = str(args[1]) if len(args) > 1 else 'error-unknown-bridge-type'
+    proxy_type = str(args[2]) if len(args) > 2 else 'None'
 
-    torrc_content = ['%s' % (info.torrc_text()), '\n']
+    torrc_content = ['%s# %s\n' % (info.torrc_text(), torrc_file_path), 'DisableNetwork 0\n']
 
-    if not bridge_type == 'None':
+    if bridge_type != 'None':
         if bridge_type in bridges_type:
             torrc_content.append(command_useBridges)
             torrc_content.append(bridges_command[bridges_type.index(bridge_type)])
@@ -63,28 +57,31 @@ def gen_torrc(args):
             for bridge in bridges['bridges'][bridge_type]:
                 if bridge.strip():
                     torrc_content.append('{0}\n'.format(bridge))
-    else:
-        torrc_content.append('')
 
-    if not custom_bridges == 'None':
-        print(f"DEBUG custom bridges / {custom_bridges}")
-        bridge = str(custom_bridges.split()[0]) #.lower()
-        torrc_content.append('# Custom briges are used\n')
+    if custom_bridges != 'None':
+        torrc_content.append('# Custom bridges are used\n')
         torrc_content.append(command_useBridges)
-        torrc_content.append(bridges_command[bridges_type.index(bridge)])
-        bridge_custom_list = custom_bridges.split('\n')
-        for bridge in bridge_custom_list:
+        ## Emit the matching ClientTransportPlugin line for every pluggable
+        ## transport present in the custom bridges. A Bridge line's first token
+        ## is the transport name ('obfs4', 'snowflake', 'meek_lite'); a plain
+        ## vanilla bridge (IP:port first) needs no plugin. Lines may mix
+        ## transports, so scan them all and de-duplicate the plugin lines.
+        transport_plugins = {
+            'obfs4': bridges_command[0],
+            'snowflake': bridges_command[1],
+            'meek_lite': bridges_command[2],
+        }
+        emitted_plugins = set()
+        for bridge_line in custom_bridges.split('\n'):
+            tokens = bridge_line.split()
+            transport = tokens[0] if tokens else ''
+            if transport in transport_plugins and transport not in emitted_plugins:
+                torrc_content.append(transport_plugins[transport])
+                emitted_plugins.add(transport)
+        for bridge in custom_bridges.split('\n'):
             if bridge.strip():
                 torrc_content.append('Bridge {0}\n'.format(bridge))
-    else:
-        torrc_content.append('')
-
-    ### Not required with tor default installation.
-    # Required for meek and snowflake only.
-    # https://forums.whonix.org/t/censorship-circumvention-tor-pluggable-transports/2601/9
-    # if bridge_type.startswith('meek') or bridge_type.startswith('snowflake'):
-    #     edit_etc_resolv_conf_add()
-
+ 
     if proxy_type != 'None' and len(args) >= 7:
         proxy_ip = str(args[3])
         proxy_port = str(args[4])
@@ -92,6 +89,9 @@ def gen_torrc(args):
         proxy_password = str(args[6])
 
         if proxy_type in proxies and proxy_ip and proxy_port:
+            ## Bracket an IPv6 literal so the '<addr>:<port>' form stays
+            ## unambiguous (Tor's *Proxy directives accept [ipv6]:port).
+            proxy_addr = '[{0}]'.format(proxy_ip) if ':' in proxy_ip else proxy_ip
             torrc_content.append('{0} {1}:{2}\n'.format(proxy_torrc[proxies.index(proxy_type)],
                                                         proxy_ip, proxy_port))
             if proxy_username:
@@ -102,8 +102,6 @@ def gen_torrc(args):
                     torrc_content.append('{0} {1}\n'.format(proxy_auth[1], proxy_username))
                     if proxy_password:
                         torrc_content.append('{0} {1}\n'.format(proxy_auth[2], proxy_password))
-    else:
-        torrc_content.append('')
 
     final_torrc_content = ''.join(torrc_content)
     content =  final_torrc_content
@@ -117,70 +115,82 @@ def gen_torrc(args):
     )
 
 def parse_torrc():
-    use_bridge = 'UseBridges' in open(torrc_file_path).read()
-    use_custom_bridges = '# Custom briges are used' in open(torrc_file_path).read()
-    use_proxy = 'Proxy' in open(torrc_file_path).read()
 
-    bridge_type = ''
+    # if os.path.exists(torrc_file_path):
+    torrc_file_path_obj = Path(torrc_file_path)
+    torrc_file_contents = torrc_file_path_obj.read_text(encoding="utf-8")
+    torrc_file_lines = torrc_file_contents.split("\n")
+    use_bridge = 'UseBridges' in torrc_file_contents
+    use_custom_bridges = '# Custom bridges are used' in torrc_file_contents
+    use_proxy = 'Proxy' in torrc_file_contents
+
+    ## Default to 'None' so use_bridge with no parseable Bridge line (and not
+    ## custom) does not leave bridge_type as an empty string.
+    bridge_type = 'None'
 
     if use_bridge:
-        with open(torrc_file_path, 'r') as f:
-            for line in f:
-                if line.startswith('#'):
-                    continue
+        for line in torrc_file_lines:
+            if line.strip().startswith('#'):
+                continue
 
-                if line.startswith('Bridge'):
-                    line = line.split()
-                    # The bridge name is 'meek_lite', the bridge type is 'meek'
+            if line.startswith('Bridge'):
+                line = line.split()
+                # The bridge name is 'meek_lite', the bridge type is 'meek'
+                if len(line) >= 2:
                     if line[1].startswith('meek_lite'):
                         line[1] = 'meek'
                     bridge_type = line[1]
 
-                if use_custom_bridges:
-                    bridge_type = 'Custom bridges'
+            if use_custom_bridges:
+                bridge_type = 'Custom bridges'
     else:
         bridge_type = 'None'
 
     if use_proxy:
         auth_check = False
         proxy_type = proxy_ip = proxy_port = proxy_username = proxy_password = ''
-        with open(torrc_file_path, 'r') as f:
-            for line in f:
-                line = line.strip()
-                if not line:
-                    continue
+        for line in torrc_file_lines:
+            line = line.strip()
+            if not line:
+                continue
 
-                parts = line.split()
-                if len(parts) < 2:
-                    continue
+            parts = line.split()
+            if len(parts) < 2:
+                continue
 
-                key, value = parts[0], parts[1]
+            key, value = parts[0], parts[1]
 
-                if key in proxy_torrc:
-                    proxy_type = proxies[proxy_torrc.index(key)]
-                    if ':' in value:
-                        ip_port = value.split(':', 1)
-                        proxy_ip = ip_port[0]
-                        proxy_port = ip_port[1] if len(ip_port) > 1 else ''
-                    continue
+            if key in proxy_torrc:
+                proxy_type = proxies[proxy_torrc.index(key)]
+                if value.startswith('[') and ']' in value:
+                    ## Bracketed IPv6 literal: [addr]:port
+                    end = value.rfind(']')
+                    proxy_ip = value[1:end]
+                    rest = value[end + 1:]
+                    proxy_port = rest[1:] if rest.startswith(':') else ''
+                elif ':' in value:
+                    ip_port = value.rsplit(':', 1)
+                    proxy_ip = ip_port[0]
+                    proxy_port = ip_port[1] if len(ip_port) > 1 else ''
+                continue
 
-                if key == proxy_auth[0]:  # HTTPSProxyAuthenticator
-                    auth_check = True
-                    if ':' in value:
-                        user_pass = value.split(':', 1)
-                        proxy_username = user_pass[0]
-                        proxy_password = user_pass[1] if len(user_pass) > 1 else ''
-                    continue
+            if key == proxy_auth[0]:  # HTTPSProxyAuthenticator
+                auth_check = True
+                if ':' in value:
+                    user_pass = value.split(':', 1)
+                    proxy_username = user_pass[0]
+                    proxy_password = user_pass[1] if len(user_pass) > 1 else ''
+                continue
 
-                if key == proxy_auth[1]:  # Socks5ProxyUsername
-                    auth_check = True
-                    proxy_username = value
-                    continue
+            if key == proxy_auth[1]:  # Socks5ProxyUsername
+                auth_check = True
+                proxy_username = value
+                continue
 
-                if key == proxy_auth[2]:  # Socks5ProxyPassword
-                    auth_check = True
-                    proxy_password = value
-                    continue
+            if key == proxy_auth[2]:  # Socks5ProxyPassword
+                auth_check = True
+                proxy_password = value
+                continue
 
         if not auth_check:
             proxy_username = ''
@@ -194,5 +204,3 @@ def parse_torrc():
         proxy_password = ''
 
     return (bridge_type, proxy_type, proxy_ip, proxy_port, proxy_username, proxy_password)
-
-    return None
