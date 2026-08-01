@@ -12,12 +12,9 @@ import subprocess
 from subprocess import call
 
 from . import info
-# from .tor_status import write_to_temp_then_move
 
-whonix = os.path.exists('/usr/share/anon-gw-base-files/gateway')
 
 torrc_file_path = '/etc/torrc.d/20_default_torrc.conf'
-torrc_user_file_path = '/usr/local/etc/torrc.d/50_user.conf'
 
 bridges_default_path = '/usr/share/tor-control-panel/bridges_default'
 

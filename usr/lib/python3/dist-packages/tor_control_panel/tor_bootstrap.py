@@ -1,5 +1,4 @@
 #!/usr/bin/python3 -su
-# -*- coding: utf-8 -*-
 
 ## Copyright (C) 2018 - 2025 ENCRYPTED SUPPORT LLC <adrelanos@whonix.org>
 ## See the file COPYING for copying conditions.
@@ -11,14 +10,27 @@ import os
 import re
 import time
 
+from sanitize_string.sanitize_string_lib import sanitize_string
+
 from PyQt5.QtCore import *
 from PyQt5.QtWidgets import QApplication
+
+## Holds a strong reference to every TorBootstrap thread while it is running so
+## Python cannot garbage-collect a QThread that is still executing (which
+## crashes with "QThread: Destroyed while thread is still running"). Each thread
+## removes itself when it finishes. Callers keep their own bootstrap_thread
+## reference to the currently active thread separately.
+_active_bootstrap_threads = set()
 
 class TorBootstrap(QThread):
     signal = pyqtSignal(str, int)
 
     def __init__(self, main):
         super(TorBootstrap, self).__init__(main)
+
+        _active_bootstrap_threads.add(self)
+        self.finished.connect(
+            lambda: _active_bootstrap_threads.discard(self))
 
         self.control_cookie_path = '/run/tor/control.authcookie'
         self.control_socket_path = '/run/tor/control'
@@ -29,18 +41,25 @@ class TorBootstrap(QThread):
         '''
         self.tag_phase = {'starting': 'Starting',
                     'conn_proxy': 'Connecting to proxy',
+                    'conn_done_proxy': 'Connected to proxy',
+                    'conn_pt': 'Connecting to a pluggable transport',
+                    'conn_done_pt': "Connected to pluggable transport",
+                    'conn_proxy': 'Connecting to the proxy',
+                    'conn_done_proxy': 'Connected to the proxy',
                     'conn': 'Connecting to a relay',
                     'conn_dir': 'Connecting to a relay directory',
-                    'conn_done_pt': "Connected to pluggable transport",
                     'handshake_dir': 'Finishing handshake with directory server',
                     'onehop_create': 'Establishing an encrypted directory connection',
                     'requesting_status': 'Retrieving network status',
                     'loading_status': 'Loading network status',
                     'loading_keys': 'Loading authority certificates',
                     'enough_dirinfo': 'Loaded enough directory info to build circuits',
+                    'ap_conn_pt': 'Connecting to a pluggable transport to build circuits',
+                    'ap_conn_done_pt': 'Connected to pluggable transport to build circuits',
+                    'ap_conn_proxy': 'Connecting to the proxy to build circuits',
+                    'ap_conn_done_proxy': 'Connected to the proxy to build circuits',
                     'ap_conn': 'Connecting to a relay to build circuits',
                     'ap_conn_done': 'Connected to a relay to build circuits',
-                    'ap_conn_done_pt': 'Connected to pluggable transport to build circuits',
                     'ap_handshake': 'Finishing handshake with a relay to build circuits',
                     'ap_handshake_done': 'Handshake finished with a relay to build circuits',
                     'requesting_descriptors': 'Requesting relay information',
@@ -48,6 +67,7 @@ class TorBootstrap(QThread):
                     'conn_or': 'Connecting to the Tor network',
                     'conn_done': "Connected to a relay",
                     'handshake': "Handshaking with a relay",
+                    'handshake_done': 'Handshake finished with a relay',
                     'handshake_or': 'Finishing handshake with first hop',
                     'circuit_create': 'Establishing a Tor circuit',
                     'done': 'Connected to the Tor network!'}
@@ -131,13 +151,18 @@ class TorBootstrap(QThread):
         if self.tor_controller == None:
             sys.stdout.write('Controller connection failed.\n')
             sys.stdout.flush()
-            sys.exit(1)
+            ## Return (end this QThread's run) rather than sys.exit(): an
+            ## unhandled SystemExit raised inside a QThread can abort the whole
+            ## application (the "window vanished" symptom), e.g. when Enable
+            ## network briefly restarts Tor and the controller is momentarily
+            ## unavailable.
+            return
 
         if self.tor_controller.get_conf('DisableNetwork') == '1':
             self.tor_controller.set_conf('DisableNetwork', '0')
             sys.stdout.write('Toggle DisableNetwork value to 0. Tor is now allowed to connect to the network.\n')
             sys.stdout.flush()
-            sys.exit(1)
+            return
 
         bootstrap_percent = 0
         while bootstrap_percent < 100:
@@ -145,20 +170,36 @@ class TorBootstrap(QThread):
             bootstrap_status = self.tor_controller.get_info("status/bootstrap-phase")
 
             if bootstrap_status != self.previous_status:
-                bootstrap_percent = int(re.match('.* PROGRESS=([0-9]+).*', bootstrap_status).group(1))
-                bootstrap_tag = re.search(r'TAG=(.*) +SUMMARY', bootstrap_status).group(1)
+                progress_match = re.match('.* PROGRESS=([0-9]+).*', bootstrap_status)
+                tag_match = re.search(r'TAG=(.*) +SUMMARY', bootstrap_status)
+                if not (progress_match and tag_match):
+                    ## Unexpected status line: record it and skip, rather than
+                    ## crashing the bootstrap thread on a None .group() call.
+                    self.previous_status = bootstrap_status
+                    time.sleep(0.2)
+                    continue
+                bootstrap_percent = int(progress_match.group(1))
+                bootstrap_tag = tag_match.group(1)
                 ''' Use TAG= keyword for bootstrap_phase, according to:
                 https://gitweb.torproject.org/tor-launcher.git/plain/README-BOOTSTRAP
                 '''
                 if bootstrap_tag in self.tag_phase:
                     bootstrap_phase = self.tag_phase[bootstrap_tag]
                 else:
-                    '''Use a static message to cover unknown bootstrap tag to avoid potential
-                    misleading/harmful info shown.'''
-                    bootstrap_phase = "Unknown Bootstrap TAG. This is harmless. Please run this program from command line to view console output and report this."
-                    sys.stdout.write('Unknown Bootstrap TAG. Full message is shown in the very next line:\n')
+                    ## Unknown / newer tag: fall back to Tor's own human-readable
+                    ## SUMMARY (sanitized, since it is untrusted) rather than a
+                    ## generic placeholder, so e.g. proxy phases still read well.
+                    summary_match = re.search(r'SUMMARY="([^"]*)"', bootstrap_status)
+                    if summary_match:
+                        bootstrap_phase = sanitize_string(summary_match.group(1))
+                    else:
+                        bootstrap_phase = 'Connecting to the Tor network...'
+                    sys.stdout.write('Unknown Bootstrap TAG: %s\n'
+                                     % sanitize_string(bootstrap_tag))
                     sys.stdout.flush()
-                sys.stdout.write('{0}\n'.format(bootstrap_status))
+                ## bootstrap_status is untrusted Tor output; sanitize before
+                ## writing it to the terminal.
+                sys.stdout.write('{0}\n'.format(sanitize_string(bootstrap_status)))
                 sys.stdout.flush()
                 self.previous_status = bootstrap_status
                 self.signal.emit(bootstrap_phase, bootstrap_percent)
