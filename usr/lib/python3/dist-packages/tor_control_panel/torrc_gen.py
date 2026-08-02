@@ -40,7 +40,7 @@ proxy_auth = ['HTTPSProxyAuthenticator',
               'Socks5ProxyPassword']
 
 def user_path():
-    return torrc_user_file_path
+    return torrc_file_path
 
 def gen_torrc(args):
     bridge_type = str(args[0]) if len(args) > 0 else 'None'

@@ -748,7 +748,7 @@ class TorControlPanel(QDialog):
                         text = 'Something is wrong: directory /run/tor does not exists. Try to restart Tor.'
 
                 elif button.text() == self.button_name[2]:
-                    with open(torrc_gen.torrc_path()) as f:
+                    with open(torrc_gen.user_path()) as f:
                         ## torrc may contain user-supplied content; sanitize.
                         text = sanitize_string(f.read())
 
