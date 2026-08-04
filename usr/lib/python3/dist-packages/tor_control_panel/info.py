@@ -201,7 +201,6 @@ SOCKSPort 127.0.0.1:9050
 SOCKSPort 127.0.0.1:9150 IsolateDestAddr IsolateDestPort
 ## DNS resolution through Tor
 DNSPort 127.0.0.1:5353
-## Control port for Tor controller tools
 ControlPort 9051
 ## Cookie authentication for control port
 CookieAuthentication 1

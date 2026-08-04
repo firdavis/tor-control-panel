@@ -1,7 +1,5 @@
 # Tor Control Graphical User Interface #
 
-WARNING: Not (yet) a standalone ready to use outside of Whonix:
-
 tor-control-panel is a Tor controller.
 
 tor-control-panel is produced independently from the Tor anonymity

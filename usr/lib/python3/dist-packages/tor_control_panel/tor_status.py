@@ -12,6 +12,10 @@ torrc_file_path = '/etc/torrc.d/20_default_torrc.conf'
 def tor_status():
     print("tor_status was called.")
 
+    with open(torrc_file_path) as f:
+        for line in f:
+            print(line.strip())  # Print each line without extra whitespace
+
     def tor_enabled_check():
         with open(torrc_file_path, 'r') as f:
             content = f.readlines()

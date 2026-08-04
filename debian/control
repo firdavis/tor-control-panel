@@ -25,7 +25,6 @@ Depends:
          ${misc:Depends}
 Recommends: obfs4proxy, tor
 Description: Tor Control Graphical User Interface
- WARNING: Not (yet) a standalone ready to use outside of Whonix:
  .
  tor-control-panel is a Tor controller.
  .

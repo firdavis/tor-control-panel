@@ -66,12 +66,14 @@ class TorControlPanel(QDialog):
                         'obfs4',
                         'snowflake',
                         'meek',
+                        'webtunnel',
                         'Custom bridges']
 
         self.default_bridges = ['None',
                                 'obfs4',
                                 'snowflake',
-                                'meek']
+                                'meek',
+                                'webtunnel']
 
         self.proxies = ['None',
                         'HTTP / HTTPS',
