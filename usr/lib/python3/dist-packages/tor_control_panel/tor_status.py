@@ -66,7 +66,7 @@ def set_enabled():
     ## When using system tor, the DisableNetwork line is ignored in torrc.
     ## It is managed with SETCONF in the bundled Tor in Tor Browser,
     ## switching ftom 1 to 0 when connecting to the network.
-    ## So, the use of stem.set_conf seems the simpest way to overcome the isssue.
+    ## So, the use of stem.set_conf seems the simplest way to overcome the isssue.
     ## Whonix does it a different way that was not explored.
     with Controller.from_port(port=9051) as controller:
         controller.authenticate()

@@ -193,6 +193,8 @@ def torrc_text():
 #    2. Even a single character change in this file may cause errors.
 # However, deleting this file is fine, since a new plain file will be generated the next time 
 # you run tor-control-panel.
+## Tor logging
+Log notice file /run/tor/log
 DisableNetwork 0
 RunAsDaemon 1
 ## Run a SOCKS5 proxy on port 9050
@@ -204,9 +206,6 @@ DNSPort 127.0.0.1:5353
 ControlPort 9051
 ## Cookie authentication for control port
 CookieAuthentication 1
-
-## Tor logging
-Log notice file /run/tor/log
 '''
     return text.strip()
 

@@ -16,7 +16,7 @@ torrc_file_path = '/etc/torrc.d/20_default_torrc.conf'
 
 bridges_default_path = '/usr/share/tor-control-panel/bridges_default'
 
-command_useBridges = 'UseBridges 1\n'
+command_useBridges = '\nUseBridges 1\n'
 
 bridges_command = ['ClientTransportPlugin obfs4 exec /usr/bin/obfs4proxy\n',
                    'ClientTransportPlugin snowflake exec /usr/bin/snowflake-client\n',
@@ -49,7 +49,12 @@ def gen_torrc(args):
     custom_bridges = str(args[1]) if len(args) > 1 else 'error-unknown-bridge-type'
     proxy_type = str(args[2]) if len(args) > 2 else 'None'
 
-    torrc_content = ['%s# %s\n' % (info.torrc_text(), torrc_file_path), 'DisableNetwork 0\n']
+    '''
+    With the default info.torrc_text, this line creates a double DisableNetwork entry in torrc,
+    adds # and 'torrc_file_path' to the last line. Was not easy to fix. See also command_useBridges.
+    '''
+    # torrc_content = ['%s# %s\n' % (info.torrc_text(), torrc_file_path), 'DisableNetwork 0\n']
+    torrc_content = ['%s' % info.torrc_text()]
 
     if bridge_type != 'None':
         if bridge_type in bridges_type:
