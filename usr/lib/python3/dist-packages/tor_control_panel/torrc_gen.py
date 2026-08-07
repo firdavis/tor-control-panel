@@ -100,6 +100,7 @@ def gen_torrc(args):
             ## Bracket an IPv6 literal so the '<addr>:<port>' form stays
             ## unambiguous (Tor's *Proxy directives accept [ipv6]:port).
             proxy_addr = '[{0}]'.format(proxy_ip) if ':' in proxy_ip else proxy_ip
+            torrc_content.append('\n')
             torrc_content.append('{0} {1}:{2}\n'.format(proxy_torrc[proxies.index(proxy_type)],
                                                         proxy_ip, proxy_port))
             if proxy_username:
