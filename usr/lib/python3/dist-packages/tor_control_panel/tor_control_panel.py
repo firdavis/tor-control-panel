@@ -63,17 +63,18 @@ class TorControlPanel(QDialog):
         self.journal_command = ['sudo', 'journalctl', '-n', '200', '-u', 'tor@default.service']
 
         self.bridges = ['None',
+                        'webtunnel',
                         'obfs4',
                         'snowflake',
                         'meek',
-                        'webtunnel',
                         'Custom bridges']
 
         self.default_bridges = ['None',
+                                'webtunnel',
                                 'obfs4',
                                 'snowflake',
-                                'meek',
-                                'webtunnel']
+                                'meek']
+
 
         self.proxies = ['None',
                         'HTTP / HTTPS',

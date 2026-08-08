@@ -18,15 +18,17 @@ bridges_default_path = '/usr/share/tor-control-panel/bridges_default'
 
 command_useBridges = '\nUseBridges 1\n'
 
-bridges_command = ['ClientTransportPlugin obfs4 exec /usr/bin/obfs4proxy\n',
+bridges_command = [
+                   'ClientTransportPlugin webtunnel exec /usr/bin/webtunnel-client\n',
+                   'ClientTransportPlugin obfs4 exec /usr/bin/obfs4proxy\n',
                    'ClientTransportPlugin snowflake exec /usr/bin/snowflake-client\n',
-                   'ClientTransportPlugin meek_lite exec /usr/bin/obfs4proxy\n',
-                   'ClientTransportPlugin webtunnel exec /usr/bin/webtunnel-client\n']
+                   'ClientTransportPlugin meek_lite exec /usr/bin/obfs4proxy\n']
 
-bridges_type = ['obfs4',
+bridges_type = [
+                'webtunnel',
+                'obfs4',
                 'snowflake',
                 'meek',
-                'webtunnel',
                 'Custom bridges']
 
 proxy_torrc = ['HTTPSProxy',
@@ -74,10 +76,10 @@ def gen_torrc(args):
         ## vanilla bridge (IP:port first) needs no plugin. Lines may mix
         ## transports, so scan them all and de-duplicate the plugin lines.
         transport_plugins = {
-            'obfs4': bridges_command[0],
-            'snowflake': bridges_command[1],
-            'meek_lite': bridges_command[2],
-            'webtunnel': bridges_command[3]
+            'webtunnel': bridges_command[0],
+            'obfs4': bridges_command[1],
+            'snowflake': bridges_command[2],
+            'meek_lite': bridges_command[3]
         }
         emitted_plugins = set()
         for bridge_line in custom_bridges.split('\n'):
