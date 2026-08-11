@@ -51,10 +51,9 @@ def gen_torrc(args):
     custom_bridges = str(args[1]) if len(args) > 1 else 'error-unknown-bridge-type'
     proxy_type = str(args[2]) if len(args) > 2 else 'None'
 
-    '''
-    With the default info.torrc_text, this line creates a double DisableNetwork entry in torrc,
-    adds # and 'torrc_file_path' to the last line. Was not easy to fix. See also command_useBridges.
-    '''
+    ##With the default info.torrc_text, this line creates a double DisableNetwork entry in torrc,
+    ##adds # and 'torrc_file_path' to the last line. See also command_useBridges,
+    ## and append newline before append proxy to torrc.
     # torrc_content = ['%s# %s\n' % (info.torrc_text(), torrc_file_path), 'DisableNetwork 0\n']
     torrc_content = ['%s' % info.torrc_text()]
 

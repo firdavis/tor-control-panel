@@ -15,15 +15,23 @@ from subprocess import call, Popen, PIPE
 import os
 import glob
 import tempfile
+import shutil
 
 from sanitize_string.sanitize_string_lib import sanitize_string
 
 from . import tor_status, tor_bootstrap, torrc_gen, info
+from .debian_configure import configure
 
 
 class TorControlPanel(QDialog):
     def __init__(self):
         super(TorControlPanel, self).__init__()
+
+        print("annggg")
+        # if not shutil.which('tor'):
+        if not os.path.exists('/etc/tor/configuration_done'):
+            print("amaziiinnnggg")
+            configure()
 
         self.setMinimumSize(650, 465)
         self.setWindowFlag(Qt.WindowMinimizeButtonHint)
