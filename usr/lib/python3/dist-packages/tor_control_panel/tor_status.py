@@ -58,7 +58,7 @@ def set_enabled():
     ## Write torrc as root.
     ## No need to change file permissions.
     subprocess.run(
-        ["sudo", "tee", torrc_file_path],
+        ["sudo", "/usr/bin/tee", torrc_file_path],
         input=content.encode(),
         check=True
     )
@@ -98,7 +98,7 @@ def set_disabled():
             content = f.read() + '\n' + 'DisableNetwork 1' + '\n'
 
     subprocess.run(
-        ["sudo", "tee", torrc_file_path],
+        ["sudo", "/usr/bin/tee", torrc_file_path],
         input=content.encode(),
         check=True
     )

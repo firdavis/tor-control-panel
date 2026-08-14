@@ -6,3 +6,19 @@ user ALL=NOPASSWD: /bin/systemctl reload tor@default.service
 user ALL=NOPASSWD: /bin/systemctl stop tor@default.service
 user ALL=NOPASSWD: /bin/systemctl restart tor@default.service
 user ALL=NOPASSWD: /bin/systemctl status tor@default.service
+
+##"subprocess.run ['sudo', ...]" is used multiple times in the package.
+## It has ben working until I discovered a passwordless file for 'user' in sudoers.d,
+## After removing the file, it was a different story, so:
+## Write files as root.
+user ALL=NOPASSWD: /usr/bin/tee
+
+## In Debian configuration, install webtunnel and tor if necessary.
+user ALL=NOPASSWD: /usr/bin/apt install tor -y
+user ALL=NOPASSWD: /usr/bin/apt install webtunnel -y
+
+## Reboot after configuration.
+user ALL=NOPASSWD: /usr/sbin/reboot
+
+## Comment: all this, because I have yet to figure out how to replace sudo
+## with pkexec (polkit) for the commands without authentication request.

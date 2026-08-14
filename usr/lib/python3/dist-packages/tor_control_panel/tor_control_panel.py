@@ -27,10 +27,8 @@ class TorControlPanel(QDialog):
     def __init__(self):
         super(TorControlPanel, self).__init__()
 
-        print("annggg")
         # if not shutil.which('tor'):
         if not os.path.exists('/etc/tor/configuration_done'):
-            print("amaziiinnnggg")
             configure()
 
         self.setMinimumSize(650, 465)
@@ -82,7 +80,6 @@ class TorControlPanel(QDialog):
                                 'obfs4',
                                 'snowflake',
                                 'meek']
-
 
         self.proxies = ['None',
                         'HTTP / HTTPS',

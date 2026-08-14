@@ -5,6 +5,19 @@
 
 from PyQt5 import QtCore, QtWidgets
 
+def configuration_info():
+    reply = QtWidgets.QMessageBox(QtWidgets.QMessageBox.NoIcon, 'Tor Control Panel configuration for Debian',
+'''<p><b>  First run configuration.<br><br>
+Actions to be performed:</b></p>
+
+<p>  - create a file in /etc/profile.d to force Tor Browser use system tor
+ instead of it's own bundled tor</p>
+<p>   - add user debian-tor</p>
+<p>   - if missing, install tor
+Add the %include directive to /etc/tor/torrc</p>
+<p>  - check it Tor Browser is installed (in home diredtory)</p>
+''', QtWidgets.QMessageBox.Ok)
+    reply.exec_()
 
 def show_help_censorship():
     reply = QtWidgets.QMessageBox(QtWidgets.QMessageBox.NoIcon, 'Censorship Circumvention Help',
