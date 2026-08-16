@@ -10,12 +10,12 @@ def configuration_info():
 '''<p><b>  First run configuration.<br><br>
 Actions to be performed:</b></p>
 
-<p>  - create a file in /etc/profile.d to force Tor Browser use system tor
- instead of it's own bundled tor</p>
+<p>   - create a file in /etc/profile.d to force Tor Browser use system tor
+            instead of it's own bundled tor</p>
+<p>   - check it Tor Browser is installed (in home diredtory)</p>
 <p>   - add user debian-tor</p>
-<p>   - if missing, install tor
-Add the %include directive to /etc/tor/torrc</p>
-<p>  - check it Tor Browser is installed (in home diredtory)</p>
+<p>   - if missing, install tor. Add the %include directive to /etc/tor/torrc</p>
+<p>   - install webtunnel (from Debian testing untill available in stable)
 ''', QtWidgets.QMessageBox.Ok)
     reply.exec_()
 

@@ -12,7 +12,7 @@ def configure():
 
     ## Write /etc/profile.d/torbrowser..sh,
     ## which force Tor Browser to use system tor
-    ## instead of it'w own bundled tor.'
+    ## instead of it's own bundled tor.
     if not os.path.exists("/etc/profile.d/torbrowser.sh"):
         path = "/etc/profile.d/torbrowser.sh"
         content = "export TOR_SKIP_LAUNCH=1\n"
@@ -22,14 +22,16 @@ def configure():
             check=True
         )
 
+
     ## Create user/group debian-tor.
     ## No consequences if it's already exists.
     subprocess.run(
         ['sudo', 'usermod', '-a', '-G', 'debian-tor', 'debian-tor']
     )
 
+
     ## Install tor if missing.
-    if not os.path.exists("/us/bin/tor"):
+    if not os.path.exists("/usr/bin/tor"):
         subprocess.run(
             ['sudo', '/usr/bin/apt', 'install', 'tor', '-y']
         )
@@ -43,18 +45,60 @@ def configure():
                 ["sudo", "/usr/bin/tee", path],
                 input=content.encode(),
                 check=True
-            )
+        subprocess.run(
+            ['sudo', '/bin/systemct', 'reload', 'tor@default.service']
+        )
 
+
+    if not os.path.exists('/etc/torrc.d/'):
+        subprocess.run(
+            ['sudo' , 'mkdir', '/etc/torrc.d']
+        )
+        path = '/etc/torrc.d/20_default_torrc.conf'
+        content = info.torrc_text()
+        subprocess.run(
+            ["sudo", "/usr/bin/tee", path],
+            input=content.encode(),
+            check=True
+        )
+
+
+    ## webtunnel not in stable repo yet.
+    ## Install  from testing.
+    if not os.path.exists("/usr/bin/webtunnel-client"):
+        path = "/etc/apt/sources.list.d/debian-testing.sources"
+        content = '''Types: deb
+URIs: http://deb.debian.org/debian
+Suites: testing
+Components: main
+Enabled: yes
+'''
+        subprocess.run(
+            ['sudo', '/usr/bin/tee', path],
+            input=content.encode(),
+            check=True
+        )
+        subprocess.run(
+            ['sudo', 'apt', 'update']
+        )
+        subprocess.run(
+            ['sudo', 'apt', 'install', 'webtunnel', '-y']
+        )
+        subprocess.run(
+            ['sudo', 'rm', path]
+        )
 
 
     ## Configuration is done.
     path = "/etc/tor/configuration_done"
     subprocess.run(
-        ["sudo", "/usr/bin/tee", path],
+        ['sudo', '/usr/bin/tee', path],
         input='',
         check=True
     )
 
+    ## We have to reboot the system.
+    ## Let the user know it.
     reply= QMessageBox(QMessageBox.NoIcon, 'Resart requested.',
 '''<p>In order to take into acccount the changes listed in "First run configuration",
 you MUST reboot your system. ''', QMessageBox.Ok)
