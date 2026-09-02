@@ -17,50 +17,47 @@ def configure():
         path = "/etc/profile.d/torbrowser.sh"
         content = "export TOR_SKIP_LAUNCH=1\n"
         subprocess.run(
-            ["sudo", "/usr/bin/tee", path],
+            ["sudo", "tee", path],
             input=content.encode(),
             check=True
         )
 
+    torrc_path ='/etc/tor/torrc'
 
-    ## Create user/group debian-tor.
-    ## No consequences if it's already exists.
+    ## If installed, remove tor.
+    if os.path.exists('/usr/bin/tor'):
+        subprocess.run(
+            ['sudo', 'apt', 'purge', 'tor', '-y']
+        )
+
+    ## Install tor.
     subprocess.run(
-        ['sudo', 'usermod', '-a', '-G', 'debian-tor', 'debian-tor']
+        ['sudo', 'apt', 'install', 'tor', '-y']
+    )
+    ## We create our own torrc.
+    subprocess.run(
+        ['sudo', 'rm', torrc_path]
+    )
+    content = info.torrc_text()
+    print(content)
+    subprocess.run(
+        ['sudo', 'tee', torrc_path],
+        input=content.encode().strip(),
+        check=True
     )
 
+    ## Write apparmor local system_tor.
+    system_tor_path = "/etc/apparmor.d/local/system_tor"
+    content = info.local_system_tor()
+    subprocess.run(
+        ['sudo', 'tee', system_tor_path],
+        input = content.encode(),
+        check=True
+    )
 
-    ## Install tor if missing.
-    if not os.path.exists("/usr/bin/tor"):
-        subprocess.run(
-            ['sudo', '/usr/bin/apt', 'install', 'tor', '-y']
-        )
-        ## Add the %include directive to /etc/tor/torrc
-        path = "/etc/tor/torrc"
-        line_to_add = "%include /etc/torrc.d/*.conf"
-        with open(path, 'r') as f:
-            content = f.read()  + line_to_add + '\n'
-        with open(path , 'r' , encoding="utf-8") as f:
-            subprocess.run(
-                ["sudo", "/usr/bin/tee", path],
-                input=content.encode(),
-                check=True
-        subprocess.run(
-            ['sudo', '/bin/systemct', 'reload', 'tor@default.service']
-        )
-
-
-    if not os.path.exists('/etc/torrc.d/'):
-        subprocess.run(
-            ['sudo' , 'mkdir', '/etc/torrc.d']
-        )
-        path = '/etc/torrc.d/20_default_torrc.conf'
-        content = info.torrc_text()
-        subprocess.run(
-            ["sudo", "/usr/bin/tee", path],
-            input=content.encode(),
-            check=True
-        )
+    subprocess.run(
+        ['sudo', 'systemctl', 'reload', 'tor@default.service']
+    )
 
 
     ## webtunnel not in stable repo yet.
@@ -74,7 +71,7 @@ Components: main
 Enabled: yes
 '''
         subprocess.run(
-            ['sudo', '/usr/bin/tee', path],
+            ['sudo', 'tee', path],
             input=content.encode(),
             check=True
         )
@@ -92,18 +89,18 @@ Enabled: yes
     ## Configuration is done.
     path = "/etc/tor/configuration_done"
     subprocess.run(
-        ['sudo', '/usr/bin/tee', path],
+        ['sudo', 'tee', path],
         input='',
         check=True
     )
 
     ## We have to reboot the system.
-    ## Let the user know it.
+    ## Let the user know.
     reply= QMessageBox(QMessageBox.NoIcon, 'Resart requested.',
 '''<p>In order to take into acccount the changes listed in "First run configuration",
 you MUST reboot your system. ''', QMessageBox.Ok)
     reply.exec_()
 
     subprocess.run(
-        ['sudo', '/usr/sbin/reboot']
+        ['sudo', 'reboot']
     )

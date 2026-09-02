@@ -10,7 +10,7 @@ import os
 import re
 import time
 
-from sanitize_string.sanitize_string_lib import sanitize_string
+# from sanitize_string.sanitize_string_lib import sanitize_string
 
 from PyQt5.QtCore import *
 from PyQt5.QtWidgets import QApplication
@@ -191,15 +191,18 @@ class TorBootstrap(QThread):
                     ## generic placeholder, so e.g. proxy phases still read well.
                     summary_match = re.search(r'SUMMARY="([^"]*)"', bootstrap_status)
                     if summary_match:
-                        bootstrap_phase = sanitize_string(summary_match.group(1))
+                        # bootstrap_phase = sanitize_string(summary_match.group(1))
+                        bootstrap_phase = summary_match.group(1)
                     else:
                         bootstrap_phase = 'Connecting to the Tor network...'
                     sys.stdout.write('Unknown Bootstrap TAG: %s\n'
-                                     % sanitize_string(bootstrap_tag))
+                                     # % sanitize_string(bootstrap_tag))
+                                     % bootstrap_tag)
                     sys.stdout.flush()
                 ## bootstrap_status is untrusted Tor output; sanitize before
                 ## writing it to the terminal.
-                sys.stdout.write('{0}\n'.format(sanitize_string(bootstrap_status)))
+                # sys.stdout.write('{0}\n'.format(sanitize_string(bootstrap_status)))
+                sys.stdout.write('{0}\n'.format(bootstrap_status))
                 sys.stdout.flush()
                 self.previous_status = bootstrap_status
                 self.signal.emit(bootstrap_phase, bootstrap_percent)

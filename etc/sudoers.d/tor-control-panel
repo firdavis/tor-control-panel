@@ -8,13 +8,12 @@ user ALL=NOPASSWD: /bin/systemctl restart tor@default.service
 user ALL=NOPASSWD: /bin/systemctl status tor@default.service
 
 ##"subprocess.run ['sudo', 'tee'...]" is used multiple times in the package.
-## It has ben working until I discovered a passwordless file for 'user' in sudoers.d,
-## After removing the file, it was a different story, hence:
 user ALL=NOPASSWD: /usr/bin/tee
 
-## In Debian configuration, install webtunnel and tor if necessary.
-user ALL=NOPASSWD: /usr/bin/mkdir /etc/torrc.d
+## In Debian configuration, install tor and webtunnel if necessary.
+user ALL=NOPASSWD: /usr/bin/mkdir
 user ALL=NOPASSWD: /usr/bin/apt install tor -y
+user ALL=NOPASSWD: /usr/bin/apt purge tor -y
 user ALL=NOPASSWD: /usr/bin/apt update
 user ALL=NOPASSWD: /usr/bin/apt install webtunnel -y
 user ALL=NOPASSWD: /usr/bin/rm

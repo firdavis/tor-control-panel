@@ -6,7 +6,7 @@
 import subprocess
 from stem.control import Controller
 
-torrc_file_path = '/etc/torrc.d/20_default_torrc.conf'
+torrc_file_path = '/etc/tor/torrc'
 
 
 def tor_status():
@@ -55,10 +55,9 @@ def set_enabled():
         with open(torrc_file_path,'r') as f:
             content = f.read() + '\n' + 'DisableNetwork 0' + '\n'
 
-    ## Write torrc as root.
-    ## No need to change file permissions.
+    ## Write torrc.
     subprocess.run(
-        ["sudo", "/usr/bin/tee", torrc_file_path],
+        ["sudo", "tee", torrc_file_path],
         input=content.encode(),
         check=True
     )

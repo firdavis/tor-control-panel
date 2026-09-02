@@ -12,7 +12,7 @@ import subprocess
 from . import info
 
 
-torrc_file_path = '/etc/torrc.d/20_default_torrc.conf'
+torrc_file_path = '/etc/tor/torrc'
 
 bridges_default_path = '/usr/share/tor-control-panel/bridges_default'
 
@@ -67,7 +67,7 @@ def gen_torrc(args):
                     torrc_content.append('{0}\n'.format(bridge))
 
     if custom_bridges != 'None':
-        torrc_content.append('# Custom bridges are used\n')
+        torrc_content.append('\n## Custom bridges are used')
         torrc_content.append(command_useBridges)
         ## Emit the matching ClientTransportPlugin line for every pluggable
         ## transport present in the custom bridges. A Bridge line's first token
@@ -116,8 +116,6 @@ def gen_torrc(args):
     final_torrc_content = ''.join(torrc_content)
     content =  final_torrc_content
 
-    # Write torrc as root. It's a oneshot for a single file.
-    # Ne need to change file permissions.
     subprocess.run(
         ["sudo", "tee", torrc_file_path],
         input=content.encode(),

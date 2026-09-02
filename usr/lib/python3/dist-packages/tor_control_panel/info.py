@@ -241,3 +241,16 @@ def user_torrc_text():
 ############################################
 '''
     return text.strip()
+
+def local_system_tor():
+    text = '''
+## Additions for tor-control-panel
+
+  /run/tor rw,
+  /run/tor/log rwk,
+
+  /usr/bin/webtunnel-clientl ix,
+
+## End of additions
+'''
+    return text.strip()

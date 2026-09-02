@@ -17,7 +17,7 @@ import glob
 import tempfile
 import shutil
 
-from sanitize_string.sanitize_string_lib import sanitize_string
+#from sanitize_string.sanitize_string_lib import sanitize_string
 
 from . import tor_status, tor_bootstrap, torrc_gen, info
 from .debian_configure import configure
@@ -55,8 +55,7 @@ class TorControlPanel(QDialog):
         self.message = ''
         self.tor_message = info.tor_stopped()
         self.tor_running_path = '/run/tor/tor.pid'
-        self.torrc_file_path =  '/etc/torrc.d/20_default_torrc.conf'
-
+        self.torrc_file_path =  '/etc/tor/torrc'
         # Make sure torrc exists, otherwise write default torrc.
         if os.path.exists(self.torrc_file_path):
             pass
@@ -718,7 +717,8 @@ class TorControlPanel(QDialog):
                     ## Journal content is untrusted; decode defensively (a
                     ## malformed byte must not crash the log view) then strip
                     ## control characters, escape sequences and markup.
-                    text = sanitize_string(stdout.decode(errors='replace'))
+                    # text = sanitize_string(stdout.decode(errors='replace'))
+                    text = stdout.decode(errors='replace')
 
                 # Get n last lines from Tor log, HTML format for highlighting
                 # warnings and errors, write to file for text browser.
@@ -732,7 +732,7 @@ class TorControlPanel(QDialog):
                                 ## into HTML below; strip control characters,
                                 ## escape sequences and markup first so they
                                 ## cannot inject into the log view.
-                                line = sanitize_string(line)
+                                # line = sanitize_string(line)
                                 line = line + '\n'
                                 ## Redact the fixed column range; using the slice
                                 ## as a regex pattern crashes on metacharacters
@@ -756,9 +756,10 @@ class TorControlPanel(QDialog):
                         text = 'Something is wrong: directory /run/tor does not exists. Try to restart Tor.'
 
                 elif button.text() == self.button_name[2]:
-                    with open(torrc_gen.user_path()) as f:
+                   with open(torrc_gen.user_path()) as f:
                         ## torrc may contain user-supplied content; sanitize.
-                        text = sanitize_string(f.read())
+                        # text = sanitize_string(f.read())
+                        text = f.read()
 
                 self.file_browser.setText(text)
                 self.file_browser.moveCursor(QtGui.QTextCursor.End)
