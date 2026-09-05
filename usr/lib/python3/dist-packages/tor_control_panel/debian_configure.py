@@ -9,7 +9,10 @@ from . import info
 
 def configure():
     info.configuration_info()
-
+    #
+    # ## install dependencies
+    # sudo apt install python3-pyqt5
+    .
     ## Write /etc/profile.d/torbrowser..sh,
     ## which force Tor Browser to use system tor
     ## instead of it's own bundled tor.

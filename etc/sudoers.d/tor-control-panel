@@ -18,6 +18,10 @@ user ALL=NOPASSWD: /usr/bin/apt update
 user ALL=NOPASSWD: /usr/bin/apt install webtunnel -y
 user ALL=NOPASSWD: /usr/bin/rm
 
+user ALL=NOPASSWD: /usr/bin/apt install python3-pyqt5
+user ALL=NOPASSWD: sudo apt --fix-broken install
+user ALL=NOPASSWD: /usr/bin/apt install python3-stem
+
 ## Reboot after configuration.
 user ALL=NOPASSWD: /usr/sbin/reboot
 
