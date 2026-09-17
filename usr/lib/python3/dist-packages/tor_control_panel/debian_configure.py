@@ -9,21 +9,26 @@ from . import info
 
 def configure():
     info.configuration_info()
-    #
-    # ## install dependencies
-    # sudo apt install python3-pyqt5
-    .
+
+
+    ## Create user debian-tor.
+    subprocess.run(
+        ['sudo', 'usermod', '-aG', 'debian-tor', 'user']
+    )
+
+
     ## Write /etc/profile.d/torbrowser..sh,
     ## which force Tor Browser to use system tor
     ## instead of it's own bundled tor.
     if not os.path.exists("/etc/profile.d/torbrowser.sh"):
         path = "/etc/profile.d/torbrowser.sh"
-        content = "export TOR_SKIP_LAUNCH=1\n"
+        content = "export TOR_SKIP_LAUNCH=1"
         subprocess.run(
             ["sudo", "tee", path],
             input=content.encode(),
             check=True
         )
+
 
     torrc_path ='/etc/tor/torrc'
 
@@ -45,9 +50,10 @@ def configure():
     print(content)
     subprocess.run(
         ['sudo', 'tee', torrc_path],
-        input=content.encode().strip(),
+        input=content.encode(),
         check=True
     )
+
 
     ## Write apparmor local system_tor.
     system_tor_path = "/etc/apparmor.d/local/system_tor"
@@ -58,8 +64,9 @@ def configure():
         check=True
     )
 
+    ## onioncircuits
     subprocess.run(
-        ['sudo', 'systemctl', 'reload', 'tor@default.service']
+        ['sudo', 'apt', 'install', 'onioncircuits', '-y']
     )
 
 
@@ -67,12 +74,12 @@ def configure():
     ## Install  from testing.
     if not os.path.exists("/usr/bin/webtunnel-client"):
         path = "/etc/apt/sources.list.d/debian-testing.sources"
-        content = '''Types: deb
-URIs: http://deb.debian.org/debian
-Suites: testing
-Components: main
-Enabled: yes
-'''
+#         content = '''Types: deb
+# URIs: http://deb.debian.org/debian
+# Suites: testing
+# Components: main
+# Enabled: yes
+# '''
         subprocess.run(
             ['sudo', 'tee', path],
             input=content.encode(),
@@ -87,6 +94,10 @@ Enabled: yes
         subprocess.run(
             ['sudo', 'rm', path]
         )
+
+    subprocess.run(
+        ['sudo', 'systemctl', 'reload', 'tor@default.service']
+    )
 
 
     ## Configuration is done.

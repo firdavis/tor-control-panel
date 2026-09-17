@@ -10,8 +10,6 @@ from . import tor_status, tor_bootstrap, torrc_gen, info
 from .debian_configure import configure
 import os
 
-configure()
-
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QCursor, QTextCursor
@@ -28,8 +26,8 @@ class TorControlPanel(QDialog):
     def __init__(self):
         super(TorControlPanel, self).__init__()
 
-        # if not os.path.exists('/etc/tor/configuration_done'):
-        #     configure()
+        if not os.path.exists('/etc/tor/configuration_done'):
+            configure()
 
         self.setMinimumSize(650, 465)
         self.setWindowFlag(Qt.WindowMinimizeButtonHint)
@@ -434,14 +432,16 @@ class TorControlPanel(QDialog):
         self.refresh_button.setFlat(True)
 
     def newnym(self):
+        import stem
         from stem import Signal
         from stem.control import Controller
 
         try:
-            with Controller.from_socket_file('/run/tor/control') as controller:
+            # with Controller.from_socket_file('/run/tor/control') as controller:
+            with Controller.from_port(port=9051) as controller:
                 controller.authenticate()
                 controller.signal(Signal.NEWNYM)
-                self.restart_tor()
+                # self.restart_tor()
 
         except stem.UnsatisfiableRequest:
             print('signal NEWNYM  failed to be processed')
