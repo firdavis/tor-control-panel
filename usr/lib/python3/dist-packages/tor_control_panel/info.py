@@ -19,6 +19,7 @@ Actions to be performed:</b></p>
 ''', QtWidgets.QMessageBox.Ok)
     reply.exec_()
 
+
 def show_help_censorship():
     reply = QtWidgets.QMessageBox(QtWidgets.QMessageBox.NoIcon, 'Censorship Circumvention Help',
                                   '''<p><b>  Censorship Circumvention Help</b></p>
@@ -211,7 +212,7 @@ RunAsDaemon 1
 DisableNetwork 0
 
 Log notice file /run/tor/log
-SOCKSPort 127.0.0.1:9050 IsolateDestAddr IsolateDestPort
+SOCKSPort 127.0.0.1:9150 IsolateDestAddr IsolateDestPort
 DNSPort 127.0.0.1:5353
 ControlPort 9051
 CookieAuthentication 1
@@ -222,10 +223,10 @@ CookieAuthentication 1
 
 def local_system_tor():
     text = '''
+# Additions for tor-control-panel
+
   /run/tor rw,
   /run/tor/log rwk,
-
-  /usr/bin/webtunnel-clientl ix,
 '''
     return text.strip()
 

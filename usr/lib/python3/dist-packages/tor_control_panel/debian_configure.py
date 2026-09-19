@@ -10,11 +10,20 @@ from . import info
 def configure():
     info.configuration_info()
 
-
     ## Create user debian-tor.
     subprocess.run(
         ['sudo', 'usermod', '-aG', 'debian-tor', 'user']
     )
+
+    # ## Install missing dependencies
+    # if /usr/bin/apt-cache policy python3-pyqt5 | grep "Installed: (none)":
+    #     subprocess.run(
+    #         ['sudo', 'apt', 'install', 'python3-pyqt5', '-y']
+    #     )
+    # if /usr/bin/apt-cache policy python3-stem | grep "Installed: (none)":
+    #     subprocess.run(
+    #         ['sudo', 'apt', 'install', 'python3-stem', '-y']
+    #     )
 
 
     ## Write /etc/profile.d/torbrowser..sh,
@@ -24,7 +33,7 @@ def configure():
         path = "/etc/profile.d/torbrowser.sh"
         content = "export TOR_SKIP_LAUNCH=1"
         subprocess.run(
-            ["sudo", "tee", path],
+            ['sudo', 'tee', path],
             input=content.encode(),
             check=True
         )
@@ -70,16 +79,24 @@ def configure():
     )
 
 
+    ## Instal pluggable transport.
+    subprocess.run(
+        ['sudo', 'apt', 'install', 'obfs4proxy', '-y']
+    )
+    subprocess.run(
+        ['sudo', 'apt', 'install', 'snowflake-client', '-y']
+    )
+
     ## webtunnel not in stable repo yet.
     ## Install  from testing.
     if not os.path.exists("/usr/bin/webtunnel-client"):
         path = "/etc/apt/sources.list.d/debian-testing.sources"
-#         content = '''Types: deb
-# URIs: http://deb.debian.org/debian
-# Suites: testing
-# Components: main
-# Enabled: yes
-# '''
+        content = '''Types: deb
+URIs: http://deb.debian.org/debian
+Suites: testing
+Components: main
+Enabled: yes
+'''
         subprocess.run(
             ['sudo', 'tee', path],
             input=content.encode(),
