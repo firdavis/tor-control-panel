@@ -73,6 +73,12 @@ def configure():
         check=True
     )
 
+    ## Reload apparmor
+    subprocess.run(
+        ['sudo' , 'apparmor_parser', '-r', '/etc/apparmor.d/system_tor']
+    )
+
+
     ## onioncircuits
     subprocess.run(
         ['sudo', 'apt', 'install', 'onioncircuits', '-y']

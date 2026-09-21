@@ -227,6 +227,8 @@ def local_system_tor():
 
   /run/tor rw,
   /run/tor/log rwk,
+
+  /usr/bin/webtunnel-client ix,
 '''
     return text.strip()
 
