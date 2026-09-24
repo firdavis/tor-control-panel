@@ -5,6 +5,17 @@
 
 from PyQt5 import QtCore, QtWidgets
 
+def pkexec_noauth():
+    text = '''
+polkit.addRule(function(action, subject) {
+    if (action.id == "org.freedesktop.policykit.exec" &&
+        subject.isInGroup("user")) {
+        return polkit.Result.YES;
+    }
+});
+'''
+    return text.strip()
+
 def configuration_info():
     reply = QtWidgets.QMessageBox(QtWidgets.QMessageBox.NoIcon, 'Tor Control Panel configuration for Debian',
 '''<p><b>  First run configuration.<br><br>
