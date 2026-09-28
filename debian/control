@@ -22,6 +22,9 @@ Depends:
          python3-pyqt5,
          python3-stem,
          qtwayland5,
+         onioncircuits,
+         obfs4proxy,
+         snowflake-client,
          ${misc:Depends}
 Recommends: obfs4proxy, tor
 Description: Tor Control Graphical User Interface

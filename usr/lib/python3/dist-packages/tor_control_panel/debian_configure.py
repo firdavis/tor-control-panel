@@ -1,4 +1,4 @@
-#!/usr/bin/python3 -su
+#!/usr/bin/python3 -su /usr/bin/pkexec
 
 import os
 import subprocess
@@ -10,19 +10,19 @@ from . import info
 def configure():
     info.configuration_info()
 
-    ## Add pkexec passwordless.
-    path = "/etc/polkit-1/rules.d/50-nopasswd-pkexec.rules"
-    content = info.pkexec_noauth()
-    subprocess.run(
-        ['sudo', '/usr/bin/tee', path],
-        input=content.encode(),
-        check=True
-    )
+    # ## Add pkexec passwordless.
+    # path = "/etc/polkit-1/rules.d/50-nopasswd-pkexec.rules"
+    # content = info.pkexec_noauth()
+    # subprocess.run(
+    #     ['sudo', '/usr/bin/tee', path],
+    #     input=content.encode(),
+    #     check=True
+    # )
 
 
     ## Create user debian-tor.
     subprocess.run(
-        ['pkexec', '/usr/sbin/usermod', '-aG', 'debian-tor', 'user']
+        ['pkexec', '/usr/sbin/usermod', '-aG', 'user', 'debian-tor']
     )
 
 
@@ -78,20 +78,6 @@ def configure():
         ['pkexec' , '/usr/sbin/apparmor_parser', '-r', '/etc/apparmor.d/system_tor']
     )
 
-
-    ## onioncircuits
-    subprocess.run(
-        ['pkexec', '/usr/bin/apt', 'install', 'onioncircuits', '-y']
-    )
-
-
-    ## Instal pluggable transport.
-    subprocess.run(
-        ['pkexec', '/usr/bin/apt', 'install', 'obfs4proxy', '-y']
-    )
-    subprocess.run(
-        ['pkexec', '/usr/bin/apt', 'install', 'snowflake-client', '-y']
-    )
 
     ## webtunnel not in stable repo yet.
     ## Install  from testing.
