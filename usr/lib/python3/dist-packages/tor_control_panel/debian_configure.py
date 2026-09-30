@@ -1,4 +1,4 @@
-#!/usr/bin/python3 -su /usr/bin/pkexec
+#!/usr/bin/sudo /usr/bin/python3 -su
 
 import os
 import subprocess
@@ -10,20 +10,12 @@ from . import info
 def configure():
     info.configuration_info()
 
-    # ## Add pkexec passwordless.
-    # path = "/etc/polkit-1/rules.d/50-nopasswd-pkexec.rules"
-    # content = info.pkexec_noauth()
+
+    # # Create user debian-tor, if not existing.
     # subprocess.run(
-    #     ['sudo', '/usr/bin/tee', path],
-    #     input=content.encode(),
+    #     ['sudo', '/usr/sbin/usermod', '-aG', '$USER', 'debian-tor'],
     #     check=True
     # )
-
-
-    ## Create user debian-tor.
-    subprocess.run(
-        ['pkexec', '/usr/sbin/usermod', '-aG', 'user', 'debian-tor']
-    )
 
 
     ## Write /etc/profile.d/torbrowser..sh,
@@ -31,9 +23,9 @@ def configure():
     ## instead of it's own bundled tor.
     if not os.path.exists("/etc/profile.d/torbrowser.sh"):
         path = "/etc/profile.d/torbrowser.sh"
-        content = "export TOR_SKIP_LAUNCH=1"
+        content = "export TOR_SKIP_LAUNCH=1\n"
         subprocess.run(
-            ['pkexec', '/usr/bin/tee', path],
+            ['sudo', '/usr/bin/tee', path],
             input=content.encode(),
             check=True
         )
@@ -41,24 +33,29 @@ def configure():
 
     torrc_path ='/etc/tor/torrc'
 
-    ## If installed, remove tor.
+    ## If installed, reinstall tor.
     if os.path.exists('/usr/bin/tor'):
         subprocess.run(
-            ['pkexec', '/usr/bin/apt', 'purge', 'tor', '-y']
+            ['sudo', '/usr/bin/apt', 'install', '--reinstall', 'tor', '-y'],
+            check=True
         )
 
-    ## Install tor.
+    else:
+        ## Install tor.
+        subprocess.run(
+            ['sudo', '/usr/bin/apt', 'install', 'tor', '-y'],
+            check=True
+        )
+
+    # We create our own torrc.
     subprocess.run(
-        ['pkexec', '/usr/bin/apt', 'install', 'tor', '-y']
-    )
-    ## We create our own torrc.
-    subprocess.run(
-        ['pkexec', 'rm', torrc_path]
+        ['sudo', '/usr/bin/rm', torrc_path],
+        check=True
     )
     content = info.torrc_text()
     print(content)
     subprocess.run(
-        ['pkexec', '/usr/bin/tee', torrc_path],
+        ['sudo', '/usr/bin/tee', torrc_path],
         input=content.encode(),
         check=True
     )
@@ -68,16 +65,16 @@ def configure():
     system_tor_path = "/etc/apparmor.d/local/system_tor"
     content = info.local_system_tor()
     subprocess.run(
-        ['pkexec', '/usr/bin/tee', system_tor_path],
+        ['sudo', '/usr/bin/tee', system_tor_path],
         input = content.encode(),
         check=True
     )
 
     ## Reload apparmor
     subprocess.run(
-        ['pkexec' , '/usr/sbin/apparmor_parser', '-r', '/etc/apparmor.d/system_tor']
+        ['sudo' , '/usr/sbin/apparmor_parser', '-r', '/etc/apparmor.d/system_tor'],
+        check=True
     )
-
 
     ## webtunnel not in stable repo yet.
     ## Install  from testing.
@@ -90,29 +87,28 @@ Components: main
 Enabled: yes
 '''
         subprocess.run(
-            ['pkexec', '/usr/bin/tee', path],
+            ['sudo', '/usr/bin/tee', path],
             input=content.encode(),
             check=True
         )
         subprocess.run(
-            ['pkexec', '/usr/bin/apt', 'update']
+            ['sudo', '/usr/bin/apt', 'update'],
+            check=True
         )
         subprocess.run(
-            ['pkexec', '/usr/bin/apt', 'install', 'webtunnel', '-y']
+            ['sudo', '/usr/bin/apt', 'install', 'webtunnel', '-y'],
+            check=True
         )
         subprocess.run(
-            ['pkexec', 'rm', path]
+            ['sudo', '/usr/bin/rm', path],
+            check=True
         )
-
-    subprocess.run(
-        ['pkexec', '/usr/bin/systemctl', 'reload', 'tor@default.service']
-    )
 
 
     ## Configuration is done.
     path = "/etc/tor/configuration_done"
     subprocess.run(
-        ['pkexec', '/usr/bin/tee', path],
+        ['sudo', '/usr/bin/tee', path],
         input='',
         check=True
     )
@@ -125,5 +121,6 @@ you MUST reboot your system. ''', QMessageBox.Ok)
     reply.exec_()
 
     subprocess.run(
-        ['pkexec', '/usr/sbin/reboot']
+        ['sudo', '/usr/sbin/reboot'],
+        check=True
     )

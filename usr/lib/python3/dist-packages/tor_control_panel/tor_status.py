@@ -57,7 +57,7 @@ def set_enabled():
 
     ## Write torrc.
     subprocess.run(
-        ["pkexec", "/usr/bin/tee", torrc_file_path],
+        ["sudo", "/usr/bin/tee", torrc_file_path],
         input=content.encode(),
         check=True
     )
@@ -97,7 +97,7 @@ def set_disabled():
             content = f.read() + '\n' + 'DisableNetwork 1' + '\n'
 
     subprocess.run(
-        ["pkexec", "/usr/bin/tee", torrc_file_path],
+        ["sudo", "/usr/bin/tee", torrc_file_path],
         input=content.encode(),
         check=True
     )

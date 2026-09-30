@@ -16,8 +16,6 @@ Rules-Requires-Root: no
 Package: tor-control-panel
 Architecture: all
 Depends:
-         pkexec,
-         mate-polkit,
          python3,
          python3-pyqt5,
          python3-stem,
@@ -26,7 +24,6 @@ Depends:
          obfs4proxy,
          snowflake-client,
          ${misc:Depends}
-Recommends: obfs4proxy, tor
 Description: Tor Control Graphical User Interface
  .
  tor-control-panel is a Tor controller.

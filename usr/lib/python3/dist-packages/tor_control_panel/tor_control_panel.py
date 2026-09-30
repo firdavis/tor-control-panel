@@ -62,8 +62,7 @@ class TorControlPanel(QDialog):
             torrc_gen.gen_torrc(args)
 
         self.button_name = ['systemd &journal', 'Tor &log', '&torrc']
-        # subprocess.run only accepts a list of strings.
-        self.journal_command = ['pkexec', '/usr/bin/journalctl', '-n', '200', '-u', 'tor@default.service']
+        self.journal_command = ['sudo', '/usr/bin/journalctl', '-n', '200', '-u', 'tor@default.service']
 
         self.bridges = ['None',
                         'webtunnel',
@@ -849,7 +848,7 @@ class TorControlPanel(QDialog):
         self.stop_tor()
         self.restart_button.setEnabled(False)
 
-        restart_command =  'pkexec /bin/systemctl restart tor@default.service'
+        restart_command =  'sudo /bin/systemctl restart tor@default.service'
         p = Popen(restart_command, shell=True)
         self.start_bootstrap()
 
@@ -858,7 +857,7 @@ class TorControlPanel(QDialog):
         if not self.bootstrap_done:
             self.bootstrap_progress.hide()
             self.bootstrap_thread.terminate()
-        stop_command =   'pkexec /bin/systemctl stop tor@default.service'
+        stop_command =   'sudo /bin/systemctl stop tor@default.service'
         p = Popen(stop_command, shell=True)
         p.wait()
         self.refresh(True)

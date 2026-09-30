@@ -1,2 +1,21 @@
-##"subprocess.run ['sudo', 'tee'...]" is used once in cofigure
+user ALL=NOPASSWD: /usr/sbin/usermod
+
+## tor commands
+user ALL=NOPASSWD: /bin/systemctl reload tor@default.service
+user ALL=NOPASSWD: /bin/systemctl stop tor@default.service
+user ALL=NOPASSWD: /bin/systemctl restart tor@default.service
+user ALL=NOPASSWD: /bin/systemctl status tor@default.service
+user ALL=NOPASSWD: /bin/journalctl -n 200 -u tor@default.service
+
 user ALL=NOPASSWD: /usr/bin/tee
+
+user ALL=NOPASSWD: /usr/bin/apt install tor -y
+user ALL=NOPASSWD: /usr/bin/rm
+user ALL=NOPASSWD: /usr/bin/apt install webtunnel/testing
+
+## Reboot after configuration.
+user ALL=NOPASSWD: /usr/sbin/reboot
+
+## Comment: all this, because I have yet to figure out how to replace sudo
+## with pkexec (polkit) for the commands without authentication request
+## for a single app, or even a single command. So far, impossible.
