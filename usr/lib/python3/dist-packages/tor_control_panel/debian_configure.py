@@ -12,10 +12,11 @@ def configure():
 
 
     # # Create user debian-tor, if not existing.
-    # subprocess.run(
-    #     ['sudo', '/usr/sbin/usermod', '-aG', '$USER', 'debian-tor'],
-    #     check=True
-    # )
+    user = os.getenv('USER')
+    subprocess.run(
+        ['sudo', '/usr/sbin/usermod', '-aG', 'user', 'debian-tor'],
+        check=True
+    )
 
 
     ## Write /etc/profile.d/torbrowser..sh,
@@ -33,17 +34,17 @@ def configure():
 
     torrc_path ='/etc/tor/torrc'
 
-    ## If installed, reinstall tor.
+    ## If installed, reinstall tor, to get te latest version.
     if os.path.exists('/usr/bin/tor'):
         subprocess.run(
-            ['sudo', '/usr/bin/apt', 'install', '--reinstall', 'tor', '-y'],
+            ['sudo', '/usr/bin/apt', 'install', '-y', '--reinstall', 'tor'],
             check=True
         )
 
     else:
         ## Install tor.
         subprocess.run(
-            ['sudo', '/usr/bin/apt', 'install', 'tor', '-y'],
+            ['sudo', '/usr/bin/apt', 'install', '-y', 'tor'],
             check=True
         )
 
@@ -96,7 +97,7 @@ Enabled: yes
             check=True
         )
         subprocess.run(
-            ['sudo', '/usr/bin/apt', 'install', 'webtunnel', '-y'],
+            ['sudo', '/usr/bin/apt', 'install', '-y', 'webtunnel'],
             check=True
         )
         subprocess.run(
