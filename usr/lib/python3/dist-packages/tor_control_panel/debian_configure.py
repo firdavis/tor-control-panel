@@ -4,6 +4,7 @@ import os
 import subprocess
 
 from PyQt5.QtWidgets import QMessageBox
+from pathlib import Path
 from . import info
 
 
@@ -11,7 +12,33 @@ def configure():
     info.configuration_info()
 
 
-    # # Create user debian-tor, if not existing.
+    ## Check if Tor Browser is installed.
+    path = None
+    def find_folder(folder_name):
+        ## Search the whole file system in case Tor Browser
+        ## is intalled in an exotic folder.
+        for path in Path('/').rglob(folder_name):
+            print(path)
+            return(path)
+
+    path = find_folder('tor-browser')
+
+    if path is None:
+        print("Tor Browser is not intallled, installing...")
+        url = "https://dist.torproject.org/torbrowser/15.0.24/tor-browser-linux-x86_64-15.0.24.tar.xz"
+        subprocess.run(
+            ['wget', '-O', 'tor-browser.tar.xz', url],
+            check=True
+        )
+        subprocess.run(
+            ['tar', '-xf', 'tor-browser.tar.xz']
+        )
+
+    else:
+        print("Tor Browser is intallled. OK. Continuing...")
+
+
+    ## Create user debian-tor, if not existing.
     user = os.getenv('USER')
     subprocess.run(
         ['sudo', '/usr/sbin/usermod', '-aG', 'user', 'debian-tor'],
@@ -54,7 +81,6 @@ def configure():
         check=True
     )
     content = info.torrc_text()
-    print(content)
     subprocess.run(
         ['sudo', '/usr/bin/tee', torrc_path],
         input=content.encode(),
@@ -121,7 +147,7 @@ Enabled: yes
 you MUST reboot your system. ''', QMessageBox.Ok)
     reply.exec_()
 
-    subprocess.run(
-        ['sudo', '/usr/sbin/reboot'],
-        check=True
-    )
+    # subprocess.run(
+    #     ['sudo', '/usr/sbin/reboot'],
+    #     check=True
+    # )
