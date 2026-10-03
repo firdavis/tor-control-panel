@@ -61,7 +61,7 @@ def configure():
 
     torrc_path ='/etc/tor/torrc'
 
-    ## If installed, reinstall tor, to get te latest version.
+    ## If installed, reinstall tor to get te latest version.
     if os.path.exists('/usr/bin/tor'):
         subprocess.run(
             ['sudo', '/usr/bin/apt', 'install', '-y', '--reinstall', 'tor'],
@@ -103,6 +103,7 @@ def configure():
         check=True
     )
 
+
     ## webtunnel not in stable repo yet.
     ## Install  from testing.
     if not os.path.exists("/usr/bin/webtunnel-client"):
@@ -143,11 +144,11 @@ Enabled: yes
     ## We have to reboot the system.
     ## Let the user know.
     reply= QMessageBox(QMessageBox.NoIcon, 'Resart requested.',
-'''<p>In order to take into acccount the changes listed in "First run configuration",
+'''<p>In order to take into acccount some of the changes listed in "First run configuration",
 you MUST reboot your system. ''', QMessageBox.Ok)
     reply.exec_()
 
-    # subprocess.run(
-    #     ['sudo', '/usr/sbin/reboot'],
-    #     check=True
-    # )
+    subprocess.run(
+        ['sudo', '/usr/sbin/reboot'],
+        check=True
+    )
