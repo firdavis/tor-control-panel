@@ -38,14 +38,6 @@ def configure():
         print("Tor Browser is intallled. OK. Continuing...")
 
 
-    ## Create user debian-tor, if not existing.
-    user = os.getenv('USER')
-    subprocess.run(
-        ['sudo', '/usr/sbin/usermod', '-aG', 'user', 'debian-tor'],
-        check=True
-    )
-
-
     ## Write /etc/profile.d/torbrowser..sh,
     ## which force Tor Browser to use system tor
     ## instead of it's own bundled tor.
