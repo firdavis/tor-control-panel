@@ -14,6 +14,7 @@ def configure():
 
     ## Check if Tor Browser is installed.
     path = None
+
     def find_folder(folder_name):
         ## Search the whole file system in case Tor Browser
         ## is intalled in an exotic folder.
@@ -31,7 +32,8 @@ def configure():
             check=True
         )
         subprocess.run(
-            ['tar', '-xf', 'tor-browser.tar.xz']
+            ['tar', '-xf', 'tor-browser.tar.xz'],
+            check=True
         )
 
     else:
