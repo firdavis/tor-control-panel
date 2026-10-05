@@ -12,34 +12,6 @@ def configure():
     info.configuration_info()
 
 
-    ## Check if Tor Browser is installed.
-    path = None
-
-    def find_folder(folder_name):
-        ## Search the whole file system in case Tor Browser
-        ## is intalled in an exotic folder.
-        for path in Path('/').rglob(folder_name):
-            print(path)
-            return(path)
-
-    path = find_folder('tor-browser')
-
-    if path is None:
-        print("Tor Browser is not intallled, installing...")
-        url = "https://dist.torproject.org/torbrowser/15.0.24/tor-browser-linux-x86_64-15.0.24.tar.xz"
-        subprocess.run(
-            ['wget', '-O', 'tor-browser.tar.xz', url],
-            check=True
-        )
-        subprocess.run(
-            ['tar', '-xf', 'tor-browser.tar.xz'],
-            check=True
-        )
-
-    else:
-        print("Tor Browser is intallled. OK. Continuing...")
-
-
     ## Write /etc/profile.d/torbrowser..sh,
     ## which force Tor Browser to use system tor
     ## instead of it's own bundled tor.
@@ -52,8 +24,6 @@ def configure():
             check=True
         )
 
-
-    torrc_path ='/etc/tor/torrc'
 
     ## If installed, reinstall tor to get te latest version.
     if os.path.exists('/usr/bin/tor'):
@@ -70,6 +40,7 @@ def configure():
         )
 
     # We create our own torrc.
+
     subprocess.run(
         ['sudo', '/usr/bin/rm', torrc_path],
         check=True
@@ -126,6 +97,36 @@ Enabled: yes
             check=True
         )
 
+
+    # ## Check if Tor Browser is installed.
+    # path = None
+    #
+    # def find_folder(folder_name):
+    #     ## Search the whole file system in case Tor Browser
+    #     ## is intalled in an exotic folder.
+    #     for path in Path('/').rglob(folder_name):
+    #         print(path)
+    #         return(path)
+    #
+    # path = find_folder('tor-browser')
+    #
+    # if path is None:
+    #     ## Install torbrowser-launcher with flatpak.
+    #     if not os.path.exists("/usr/bin/flatpak"):
+    #         subprocess.run(
+    #             ['sudo', 'apt', 'install', 'flatpak'],
+    #             check=True
+    #         )
+    #         subprocess.run(
+    #             ['sudo', 'flatpak', 'remote-add', '--if-not-exists', 'flathub', \
+    #                 'https://dl.flathub.org/repo/flathub.flatpakrepo'],
+    #             check=True
+    #         )
+    #
+    #
+    # else:
+    #     print("Tor Browser is intallled. OK. Finishing configuration...")
+    #
 
     ## Configuration is done.
     path = "/etc/tor/configuration_done"
