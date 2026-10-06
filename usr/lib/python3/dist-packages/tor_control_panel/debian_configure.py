@@ -11,6 +11,19 @@ from . import info
 def configure():
     info.configuration_info()
 
+    ## Create groups for sudoers.d, using the real user name.
+    username = os.environ["USER"]
+
+    subprocess.run(
+        ['sudo', '/usr/sbin/groupadd', '--system', 'tor-admin'],
+        check=True
+    )
+
+    subprocess.run(
+        ['sudo', '/usr/sbin/usermod', '-aG', 'tor-admin', username],
+        check=True
+    )
+
 
     ## Write /etc/profile.d/torbrowser..sh,
     ## which force Tor Browser to use system tor
@@ -40,6 +53,7 @@ def configure():
         )
 
     # We create our own torrc.
+    torrc_path = "/etc/tor/torrc"
 
     subprocess.run(
         ['sudo', '/usr/bin/rm', torrc_path],
