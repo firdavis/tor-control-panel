@@ -20,9 +20,9 @@ Depends:
          python3-pyqt5,
          python3-stem,
          qtwayland5,
+         tor,
          onioncircuits,
-         obfs4proxy,
-         snowflake-client,
+         lyrebird,
          ${misc:Depends}
 Description: Tor Control Graphical User Interface
  .

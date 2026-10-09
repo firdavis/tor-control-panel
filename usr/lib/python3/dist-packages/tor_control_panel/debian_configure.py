@@ -11,16 +11,24 @@ from . import info
 def configure():
     info.configuration_info()
 
-    ## Create groups for sudoers.d, using the real user name.
+    ## Create group for sudoers.d, no hardcoded user name.
     username = os.environ["USER"]
 
-    subprocess.run(
-        ['sudo', '/usr/sbin/groupadd', '--system', 'tor-admin'],
-        check=True
-    )
+    ## This script is supposed to be run once during installation.,
+    ## but that might change later.
+    ## If the group exists, the script will stop at groupadd.
+    if subprocess.run(
+        ["/usr/bin/getent", "group", "tor-control-panel"],
+        stdout=subprocess.DEVNULL,
+        stderr=subprocess.DEVNULL,
+    ).returncode != 0:
+        subprocess.run(
+            ['sudo', '/usr/sbin/groupadd', '--system', 'tor-control-panel'],
+            check=True
+        )
 
     subprocess.run(
-        ['sudo', '/usr/sbin/usermod', '-aG', 'tor-admin', username],
+        ['sudo', '/usr/sbin/usermod', '-aG', 'tor-control-panel', username],
         check=True
     )
 
@@ -37,20 +45,6 @@ def configure():
             check=True
         )
 
-
-    ## If installed, reinstall tor to get te latest version.
-    if os.path.exists('/usr/bin/tor'):
-        subprocess.run(
-            ['sudo', '/usr/bin/apt', 'install', '-y', '--reinstall', 'tor'],
-            check=True
-        )
-
-    else:
-        ## Install tor.
-        subprocess.run(
-            ['sudo', '/usr/bin/apt', 'install', '-y', 'tor'],
-            check=True
-        )
 
     # We create our own torrc.
     torrc_path = "/etc/tor/torrc"
@@ -136,7 +130,6 @@ Enabled: yes
     #                 'https://dl.flathub.org/repo/flathub.flatpakrepo'],
     #             check=True
     #         )
-    #
     #
     # else:
     #     print("Tor Browser is intallled. OK. Finishing configuration...")
