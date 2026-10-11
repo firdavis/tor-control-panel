@@ -1,9 +1,3 @@
-## Tor commands
-%tor-control-panel ALL=(root) NOPASSWD: \
-    /usr/bin/systemctl reload tor@default.service, \
-    /usr/bin/systemctl stop tor@default.service, \
-    /usr/bin/systemctl restart tor@default.service, \
-    /bin/journalctl -n 200 -u tor@default.service
 
 %tor-control-panel ALL=(root) NOPASSWD: /usr/bin/tee
 
