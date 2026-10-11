@@ -1,20 +1,13 @@
-%tor-control-panel ALL=(root) NOPASSWD: /usr/sbin/groupadd
-%tor-control-panel ALL=(root) NOPASSWD: /usr/sbin/usemod
-
+## Tor commands
 %tor-control-panel ALL=(root) NOPASSWD: \
-    /bin/systemctl reload tor@default.service, \
-    /bin/systemctl stop tor@default.service, \
-    /bin/systemctl restart tor@default.service, \
-    /bin/systemctl status tor@default.service, \
+    /usr/bin/systemctl reload tor@default.service, \
+    /usr/bin/systemctl stop tor@default.service, \
+    /usr/bin/systemctl restart tor@default.service, \
     /bin/journalctl -n 200 -u tor@default.service
 
 %tor-control-panel ALL=(root) NOPASSWD: /usr/bin/tee
 
-%tor-control-panel ALL=(root) NOPASSWD: /usr/bin/apt install webtunnel
-
-%tor-control-panel ALL=(root) NOPASSWD: /usr/bin/rm -y /etc/apt/sources.list.d/debian-testing.sources
-
 %tor-control-panel ALL=(root) NOPASSWD: /usr/sbin/apparmor_parser
 
-## Reboot after configuration.
+## Reboot after installation.
 %tor-control-panel ALL=(root) NOPASSWD: /usr/sbin/reboot

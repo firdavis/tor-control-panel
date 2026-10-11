@@ -1,0 +1,13 @@
+#!/bin/sh
+
+# Create group for sudoers.d, no hardcoded user name.
+username=$(id -un)
+
+# This script is supposed to be run once during installation,
+# but that might change later.
+# If the group exists, the script will stop at groupadd.
+if ! getent group tor-control-panel >/dev/null 2>&1; then
+    groupadd --system tor-control-panel
+fi
+
+usermod -aG tor-control-panel "$username"

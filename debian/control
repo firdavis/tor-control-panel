@@ -23,6 +23,7 @@ Depends:
          tor,
          onioncircuits,
          lyrebird,
+         webtunnel,
          ${misc:Depends}
 Description: Tor Control Graphical User Interface
  .

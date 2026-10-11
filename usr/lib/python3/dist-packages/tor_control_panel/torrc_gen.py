@@ -14,7 +14,7 @@ from . import info
 
 torrc_file_path = '/etc/tor/torrc'
 
-bridges_default_path = '/usr/share/tor-control-panel/bridges_default'
+bridges_default_path = '/usr/share/tor-control-panel/bridges/bridges_default'
 
 command_useBridges = '\nUseBridges 1\n'
 

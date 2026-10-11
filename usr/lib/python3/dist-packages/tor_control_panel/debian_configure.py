@@ -11,26 +11,26 @@ from . import info
 def configure():
     info.configuration_info()
 
-    ## Create group for sudoers.d, no hardcoded user name.
-    username = os.environ["USER"]
-
-    ## This script is supposed to be run once during installation.,
-    ## but that might change later.
-    ## If the group exists, the script will stop at groupadd.
-    if subprocess.run(
-        ["/usr/bin/getent", "group", "tor-control-panel"],
-        stdout=subprocess.DEVNULL,
-        stderr=subprocess.DEVNULL,
-    ).returncode != 0:
-        subprocess.run(
-            ['sudo', '/usr/sbin/groupadd', '--system', 'tor-control-panel'],
-            check=True
-        )
-
-    subprocess.run(
-        ['sudo', '/usr/sbin/usermod', '-aG', 'tor-control-panel', username],
-        check=True
-    )
+    # ## Create group for sudoers.d, no hardcoded user name.
+    # username = os.environ["USER"]
+    #
+    # ## This script is supposed to be run once during installation.,
+    # ## but that might change later.
+    # ## If the group exists, the script will stop at groupadd.
+    # if subprocess.run(
+    #     ["/usr/bin/getent", "group", "tor-control-panel"],
+    #     stdout=subprocess.DEVNULL,
+    #     stderr=subprocess.DEVNULL,
+    # ).returncode != 0:
+    #     subprocess.run(
+    #         ['sudo', '/usr/sbin/groupadd', '--system', 'tor-control-panel'],
+    #         check=True
+    #     )
+    #
+    # subprocess.run(
+    #     ['sudo', '/usr/sbin/usermod', '-aG', 'tor-control-panel', username],
+    #     check=True
+    # )
 
 
     ## Write /etc/profile.d/torbrowser..sh,
@@ -79,31 +79,31 @@ def configure():
 
     ## webtunnel not in stable repo yet.
     ## Install  from testing.
-    if not os.path.exists("/usr/bin/webtunnel-client"):
-        path = "/etc/apt/sources.list.d/debian-testing.sources"
-        content = '''Types: deb
-URIs: http://deb.debian.org/debian
-Suites: testing
-Components: main
-Enabled: yes
-'''
-        subprocess.run(
-            ['sudo', '/usr/bin/tee', path],
-            input=content.encode(),
-            check=True
-        )
-        subprocess.run(
-            ['sudo', '/usr/bin/apt', 'update'],
-            check=True
-        )
-        subprocess.run(
-            ['sudo', '/usr/bin/apt', 'install', '-y', 'webtunnel'],
-            check=True
-        )
-        subprocess.run(
-            ['sudo', '/usr/bin/rm', path],
-            check=True
-        )
+#     if not os.path.exists("/usr/bin/webtunnel-client"):
+#         path = "/etc/apt/sources.list.d/debian-testing.sources"
+#         content = '''Types: deb
+# URIs: http://deb.debian.org/debian
+# Suites: testing
+# Components: main
+# Enabled: yes
+# '''
+#         subprocess.run(
+#             ['sudo', '/usr/bin/tee', path],
+#             input=content.encode(),
+#             check=True
+#         )
+#         subprocess.run(
+#             ['sudo', '/usr/bin/apt', 'update'],
+#             check=True
+#         )
+#         subprocess.run(
+#             ['sudo', '/usr/bin/apt', 'install', '-y', 'webtunnel'],
+#             check=True
+#         )
+#         subprocess.run(
+#             ['sudo', '/usr/bin/rm', path],
+#             check=True
+#         )
 
 
     # ## Check if Tor Browser is installed.
@@ -145,12 +145,12 @@ Enabled: yes
 
     ## We have to reboot the system.
     ## Let the user know.
-    reply= QMessageBox(QMessageBox.NoIcon, 'Resart requested.',
-'''<p>In order to take into acccount some of the changes listed in "First run configuration",
-you MUST reboot your system. ''', QMessageBox.Ok)
-    reply.exec_()
-
-    subprocess.run(
-        ['sudo', '/usr/sbin/reboot'],
-        check=True
-    )
+#     reply= QMessageBox(QMessageBox.NoIcon, 'Resart requested.',
+# '''<p>In order to take into acccount some of the changes listed in "First run configuration",
+# you MUST reboot your system. ''', QMessageBox.Ok)
+#     reply.exec_()
+#
+#     subprocess.run(
+#         ['sudo', '/usr/sbin/reboot'],
+#         check=True
+#     )

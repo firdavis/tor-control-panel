@@ -33,7 +33,7 @@ class TorControlPanel(QDialog):
         self.setWindowFlag(Qt.WindowMinimizeButtonHint)
         self.setWindowFlag(Qt.WindowMaximizeButtonHint)
 
-        icons_path = '/usr/share/tor-control-panel/'
+        icons_path = '/usr/share/tor-control-panel/icons/'
         self.refresh_icon = QtGui.QIcon(icons_path + 'refresh.png')
         self.exit_icon = QtGui.QIcon(icons_path + 'Exit.png')
         self.restart_icon = QtGui.QIcon(icons_path + 'restart.png')
