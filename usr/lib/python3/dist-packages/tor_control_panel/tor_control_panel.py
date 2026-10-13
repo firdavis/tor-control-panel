@@ -10,6 +10,8 @@ from . import tor_status, tor_bootstrap, torrc_gen, info
 from .debian_configure import configure
 import os
 
+from .tor_journal import show_tor_journal
+
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QCursor, QTextCursor
@@ -62,7 +64,7 @@ class TorControlPanel(QDialog):
             torrc_gen.gen_torrc(args)
 
         self.button_name = ['systemd &journal', 'Tor &log', '&torrc']
-        self.journal_command = ['sudo', '/usr/bin/journalctl', '-n', '200', '-u', 'tor@default.service']
+        # self.journal_command = ['/usr/bin/journalctl', '-n', '200', '-u', 'tor@default.service']
 
         self.bridges = ['None',
                         'webtunnel',
@@ -711,13 +713,14 @@ class TorControlPanel(QDialog):
         for button in self.files_box.findChildren(QRadioButton):
             if button.isChecked():
                 if button.text() == self.button_name[0]:
-                    p = Popen(self.journal_command, stdout=PIPE, stderr=PIPE)
-                    stdout, stderr = p.communicate()
-                    ## Journal content is untrusted; decode defensively (a
-                    ## malformed byte must not crash the log view) then strip
-                    ## control characters, escape sequences and markup.
-                    # text = sanitize_string(stdout.decode(errors='replace'))
-                    text = stdout.decode(errors='replace')
+                    text = show_tor_journal()
+                    # p = Popen(self.journal_command, stdout=PIPE, stderr=PIPE)
+                    # stdout, stderr = p.communicate()
+                    # ## Journal content is untrusted; decode defensively (a
+                    # ## malformed byte must not crash the log view) then strip
+                    # ## control characters, escape sequences and markup.
+                    # # text = sanitize_string(stdout.decode(errors='replace'))
+                    # text = stdout.decode(errors='replace')
 
                 # Get n last lines from Tor log, HTML format for highlighting
                 # warnings and errors, write to file for text browser.
