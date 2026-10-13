@@ -21,7 +21,7 @@ from subprocess import call, Popen, PIPE
 import glob
 import tempfile
 
-#from sanitize_string.sanitize_string_lib import sanitize_string
+# from sanitize_string.sanitize_string_lib import sanitize_string
 
 
 class TorControlPanel(QDialog):

@@ -1,2 +1,2 @@
 #!/bin/bash
-chown root:root usr/lib/python3/dis-packages/tor-control-panel/tor_journal.py
+chown root:root usr/lib/python3/dist-packages/tor_control_panel/tor_journal.py

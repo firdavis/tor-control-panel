@@ -9,6 +9,7 @@ Consequently, we write a separate module for 'jounalctl' without sudo.
 We change its ownership to root is postinst.
 '''
 
+# from sanitize_string.sanitize_string_lib import sanitize_string
 from subprocess import Popen, PIPE
 
 def show_tor_journal():
