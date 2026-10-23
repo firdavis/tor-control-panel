@@ -117,8 +117,9 @@ def gen_torrc(args):
     content =  final_torrc_content
 
     subprocess.run(
-        ["sudo", "/usr/bin/tee", torrc_file_path],
-        input=content.encode(),
+        ["pkexec", "/usr/libexec/write_torrc"],
+        input=content,
+        text=True,
         check=True
     )
 

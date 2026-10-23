@@ -1,0 +1,10 @@
+<action id="org.tor-control-panel.write-torrc">
+  <description>Update Tor configuration managed by tor-control-panel</description>
+  <message>Authentication is required to change the Tor configuration</message>
+  <defaults>
+    <allow_any>no</allow_any>
+    <allow_inactive>no</allow_inactive>
+    <allow_active>yes</allow_active>   <!-- or auth_self_keep -->
+  </defaults>
+  <annotate key="org.freedesktop.policykit.exec.path">/usr/libexec/tor-control-panel/write-torrc</annotate>
+</action>

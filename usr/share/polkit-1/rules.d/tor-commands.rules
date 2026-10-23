@@ -13,9 +13,5 @@ polkit.addRule(function(action, subject) {
     if (allowedVerbs.indexOf(action.lookup("verb")) !== -1) {
         return polkit.Result.YES;
     }
-
-    if action.lookup("program") == "/usr/bin/journalctl") {
-        return polkit.Result.YES;
-    }
     return polkit.Result.NOT_HANDLED;
 });

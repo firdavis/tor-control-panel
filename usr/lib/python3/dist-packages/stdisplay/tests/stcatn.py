@@ -1,0 +1,78 @@
+#!/usr/bin/python3 -Bsu
+
+## Copyright (C) 2025 - 2025 Benjamin Grande M. S. <ben.grande.b@gmail.com>
+## Copyright (C) 2025 - 2025 ENCRYPTED SUPPORT LLC <adrelanos@whonix.org>
+## See the file COPYING for copying conditions.
+
+# pylint: disable=missing-module-docstring,duplicate-code
+
+import stdisplay.tests
+
+
+class TestSTCatn(stdisplay.tests.TestSTBase):
+    """
+    Test stcatn.
+    """
+
+    def setUp(self) -> None:
+        super().setUp()
+        self.module = "stcatn"
+
+    def test_stcatn_stdin(self) -> None:
+        """
+        Test passing stdin.
+        """
+
+        self.assertEqual(
+            "keep\nsecond\n", self._test_util(stdin="keep   \nsecond\t\n")
+        )
+        self.assertEqual("v\n", self._test_util(argv=["-"], stdin="v   \n"))
+        self.assertEqual(
+            "r_s\n", self._test_util(argv=["-", "-"], stdin="r\x07s   \n")
+        )
+
+        ## End-of-options tests.
+        self.assertEqual(
+            "keep\nsecond\n",
+            self._test_util(argv=["--"], stdin="keep   \nsecond\t\n"),
+        )
+        self.assertEqual(
+            "r_s\n",
+            self._test_util(argv=["--", "-", "-"], stdin="r\x07s   \n"),
+        )
+
+    def test_stcatn_file(self) -> None:
+        """
+        Test passing files.
+        """
+        cases = [
+            ("a b\nc d\n", [self.tmpfiles["raw"]]),
+            (
+                "a b\nc d\na b\nc d\n",
+                [self.tmpfiles["raw"], self.tmpfiles["raw"]],
+            ),
+            (self.text_dirty_sanitized + "\n", [self.tmpfiles["dirty"]]),
+            (
+                self.text_malicious_unicode_sanitized,
+                [self.tmpfiles["malicious_unicode"]],
+            ),
+            ("a_b\n", [self.tmpfiles["invalid"]]),
+        ]
+        for text, argv in cases:
+            with self.subTest(text=text, argv=argv):
+                self.assertEqual(text, self._test_util(argv=argv))
+
+        test_endofoptions_text = self.text_malicious_unicode_sanitized
+        test_endofoptions_opts = ["--", self.tmpfiles["malicious_unicode"]]
+        with self.subTest(
+            text=test_endofoptions_text, argv=test_endofoptions_opts
+        ):
+            self.assertEqual(
+                test_endofoptions_text,
+                self._test_util(argv=test_endofoptions_opts),
+            )
+
+        self.assertEqual(
+            "a b\nc d\n",
+            self._test_util(stdin="is ignored", argv=[self.tmpfiles["raw"]]),
+        )

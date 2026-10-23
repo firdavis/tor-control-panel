@@ -36,39 +36,47 @@ def configure():
     ## Write /etc/profile.d/torbrowser..sh,
     ## which force Tor Browser to use system tor
     ## instead of it's own bundled tor.
-    if not os.path.exists("/etc/profile.d/torbrowser.sh"):
-        path = "/etc/profile.d/torbrowser.sh"
-        content = "export TOR_SKIP_LAUNCH=1\n"
-        subprocess.run(
-            ['sudo', '/usr/bin/tee', path],
-            input=content.encode(),
-            check=True
-        )
+    # if not os.path.exists("/etc/profile.d/torbrowser.sh"):
+    #     path = "/etc/profile.d/torbrowser.sh"
+    #     content = "export TOR_SKIP_LAUNCH=1\n"
+    #     with open(path, 'w') as f:
+    #         f.write(content)
+    #     f.close()
+        # subprocess.run(
+        #     ['sudo', '/usr/bin/tee', path],
+        #     input=content.encode(),
+        #     check=True
+        # )
 
 
-    # We create our own torrc.
-    torrc_path = "/etc/tor/torrc"
-
-    subprocess.run(
-        ['sudo', '/usr/bin/rm', torrc_path],
-        check=True
-    )
+#     # We create our own torrc.
+#     torrc_path = "/etc/tor/torrc"
+#
+#
     content = info.torrc_text()
     subprocess.run(
-        ['sudo', '/usr/bin/tee', torrc_path],
-        input=content.encode(),
+        ["pkexec", "/usr/libexec/write_torrc"],
+        input=content,
+        text=True,
         check=True
     )
+
+    # subprocess.run(
+    #     ['sudo', '/usr/bin/tee', torrc_path],
+    #     input=content.encode(),
+    #     check=True
+    # )
 
 
     ## Write apparmor local system_tor.
-    system_tor_path = "/etc/apparmor.d/local/system_tor"
-    content = info.local_system_tor()
-    subprocess.run(
-        ['sudo', '/usr/bin/tee', system_tor_path],
-        input = content.encode(),
-        check=True
-    )
+    # if not os.path.exists("/etc/apparmor.d/local/system_tor"):
+    #     system_tor_path = "/etc/apparmor.d/local/system_tor"
+    #     content = info.local_system_tor()
+    #     subprocess.run(
+    #         ['sudo', '/usr/bin/tee', system_tor_path],
+    #         input = content.encode(),
+    #         check=True
+    #     )
 
     ## Reload apparmor
     subprocess.run(

@@ -12,10 +12,6 @@ torrc_file_path = '/etc/tor/torrc'
 def tor_status():
     print("tor_status was called.")
 
-    # with open(torrc_file_path) as f:
-    #     for line in f:
-    #         print(line.strip())  # Print each line without extra whitespace
-
     def tor_enabled_check():
         with open(torrc_file_path, 'r') as f:
             content = f.readlines()
@@ -57,8 +53,9 @@ def set_enabled():
 
     ## Write torrc.
     subprocess.run(
-        ["sudo", "/usr/bin/tee", torrc_file_path],
-        input=content.encode(),
+        ["pkexec", "/usr/libexec/write_torrc"],
+        input=content,
+        text=True,
         check=True
     )
 
@@ -97,8 +94,9 @@ def set_disabled():
             content = f.read() + '\n' + 'DisableNetwork 1' + '\n'
 
     subprocess.run(
-        ["sudo", "/usr/bin/tee", torrc_file_path],
-        input=content.encode(),
+        ["pkexec", "/usr/libexec/write_torrc"],
+        input=content,
+        text=True,
         check=True
     )
 

@@ -10,7 +10,7 @@ from . import tor_status, tor_bootstrap, torrc_gen, info
 from .debian_configure import configure
 import os
 
-from .tor_journal import show_tor_journal
+# from .tor_journal import show_tor_journal
 
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtCore import Qt
@@ -21,7 +21,7 @@ from subprocess import call, Popen, PIPE
 import glob
 import tempfile
 
-# from sanitize_string.sanitize_string_lib import sanitize_string
+from sanitize_string.sanitize_string_lib import sanitize_string
 
 
 class TorControlPanel(QDialog):
@@ -493,7 +493,7 @@ class TorControlPanel(QDialog):
 
     def stop_bootstrap_thread(self):
         ## Guard against a terminate() before start_bootstrap() ever created the
-        ## thread, which would otherwise raise AttributeError.
+        ## thread, which would otherwise raise AttributeError
         if getattr(self, 'bootstrap_thread', None):
             self.bootstrap_thread.terminate()
             ## terminate() is asynchronous; wait so callers (restart / quit) do
@@ -712,15 +712,16 @@ class TorControlPanel(QDialog):
     def refresh_logs(self):
         for button in self.files_box.findChildren(QRadioButton):
             if button.isChecked():
+                journal_command = ['/usr/bin/journalctl', '-n', '200', '-u', 'tor@default.service']
+
                 if button.text() == self.button_name[0]:
-                    text = show_tor_journal()
-                    # p = Popen(self.journal_command, stdout=PIPE, stderr=PIPE)
-                    # stdout, stderr = p.communicate()
-                    # ## Journal content is untrusted; decode defensively (a
-                    # ## malformed byte must not crash the log view) then strip
-                    # ## control characters, escape sequences and markup.
-                    # # text = sanitize_string(stdout.decode(errors='replace'))
-                    # text = stdout.decode(errors='replace')
+                    # text = show_tor_journal()
+                    p = Popen(journal_command, stdout=PIPE, stderr=PIPE)
+                    stdout, stderr = p.communicate()
+                    ## Journal content is untrusted; decode defensively (a
+                    ## malformed byte must not crash the log view) then strip
+                    ## control characters, escape sequences and markup.
+                    text = sanitize_string(stdout.decode(errors='replace'))
 
                 # Get n last lines from Tor log, HTML format for highlighting
                 # warnings and errors, write to file for text browser.
@@ -734,7 +735,7 @@ class TorControlPanel(QDialog):
                                 ## into HTML below; strip control characters,
                                 ## escape sequences and markup first so they
                                 ## cannot inject into the log view.
-                                # line = sanitize_string(line)
+                                line = sanitize_string(line)
                                 line = line + '\n'
                                 ## Redact the fixed column range; using the slice
                                 ## as a regex pattern crashes on metacharacters
@@ -760,7 +761,7 @@ class TorControlPanel(QDialog):
                 elif button.text() == self.button_name[2]:
                    with open(torrc_gen.user_path()) as f:
                         ## torrc may contain user-supplied content; sanitize.
-                        # text = sanitize_string(f.read())
+                        #text = sanitize_string(f.read())
                         text = f.read()
 
                 self.file_browser.setText(text)
@@ -851,8 +852,9 @@ class TorControlPanel(QDialog):
         self.stop_tor()
         self.restart_button.setEnabled(False)
 
-        restart_command = '/usr/bin/systemctl restart tor@default.service'
+        restart_command =   '/usr/bin/systemctl restart tor@default.service'
         p = Popen(restart_command, shell=True)
+
         self.start_bootstrap()
 
     def stop_tor(self):

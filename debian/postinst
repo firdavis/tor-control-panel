@@ -1,2 +1,3 @@
 #!/bin/bash
-chown root:root usr/lib/python3/dist-packages/tor_control_panel/tor_journal.py
+
+rm /etc/tor/torrc
