@@ -226,6 +226,7 @@ SOCKSPort 127.0.0.1:9150 IsolateDestAddr IsolateDestPort
 DNSPort 127.0.0.1:5353
 ControlPort 9051
 CookieAuthentication 1
+
 '''
     return text.strip()
 

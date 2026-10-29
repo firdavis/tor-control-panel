@@ -117,7 +117,7 @@ def gen_torrc(args):
     content =  final_torrc_content
 
     subprocess.run(
-        ["pkexec", "/usr/libexec/write_torrc"],
+        ["pkexec", "/usr/libexec/tor-control-panel/write_torrc"],
         input=content,
         text=True,
         check=True
