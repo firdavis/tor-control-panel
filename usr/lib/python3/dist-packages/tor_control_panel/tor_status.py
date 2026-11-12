@@ -53,7 +53,7 @@ def set_enabled():
 
     ## Write torrc.
     subprocess.run(
-        ["pkexec", "/usr/libexec/write_torrc"],
+        ["pkexec", "/usr/libexec/tor-control-panel/write_torrc.py"],
         input=content,
         text=True,
         check=True
@@ -94,7 +94,7 @@ def set_disabled():
             content = f.read() + '\n' + 'DisableNetwork 1' + '\n'
 
     subprocess.run(
-        ["pkexec", "/usr/libexec/write_torrc"],
+        ["pkexec", "/usr/libexec/tor-control-panel/write_torrc.py"],
         input=content,
         text=True,
         check=True

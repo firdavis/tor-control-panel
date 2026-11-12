@@ -11,51 +11,49 @@ from . import info
 def configure():
     info.configuration_info()
 
-    # ## Create group for sudoers.d, no hardcoded user name.
-    # username = os.environ["USER"]
-    #
-    # ## This script is supposed to be run once during installation.,
-    # ## but that might change later.
-    # ## If the group exists, the script will stop at groupadd.
-    # if subprocess.run(
-    #     ["/usr/bin/getent", "group", "tor-control-panel"],
-    #     stdout=subprocess.DEVNULL,
-    #     stderr=subprocess.DEVNULL,
-    # ).returncode != 0:
-    #     subprocess.run(
-    #         ['sudo', '/usr/sbin/groupadd', '--system', 'tor-control-panel'],
-    #         check=True
-    #     )
-    #
-    # subprocess.run(
-    #     ['sudo', '/usr/sbin/usermod', '-aG', 'tor-control-panel', username],
-    #     check=True
-    # )
+    ## Create group for sudoers.d, no hardcoded user name.
+    username = os.environ["USER"]
+
+    ## This script is supposed to be run once during installation.,
+    ## but that might change later.
+    ## If the group exists, the script will stop at groupadd.
+    if subprocess.run(
+        ["/usr/bin/getent", "group", "tor-control-panel"],
+        stdout=subprocess.DEVNULL,
+        stderr=subprocess.DEVNULL,
+    ).returncode != 0:
+        subprocess.run(
+            ['sudo', '/usr/sbin/groupadd', '--system', 'tor-control-panel'],
+            check=True
+        )
+
+    subprocess.run(
+        ['sudo', '/usr/sbin/usermod', '-aG', 'tor-control-panel', username],
+        check=True
+    )
 
 
-    ## Write /etc/profile.d/torbrowser..sh,
-    ## which force Tor Browser to use system tor
-    ## instead of it's own bundled tor.
-    # if not os.path.exists("/etc/profile.d/torbrowser.sh"):
-    #     path = "/etc/profile.d/torbrowser.sh"
-    #     content = "export TOR_SKIP_LAUNCH=1\n"
-    #     with open(path, 'w') as f:
-    #         f.write(content)
-    #     f.close()
-        # subprocess.run(
-        #     ['sudo', '/usr/bin/tee', path],
-        #     input=content.encode(),
-        #     check=True
-        # )
+    # Write /etc/profile.d/torbrowser..sh,
+    # which force Tor Browser to use system tor
+    # instead of it's own bundled tor.
+    if not os.path.exists("/etc/profile.d/torbrowser.sh"):
+        path = "/etc/profile.d/torbrowser.sh"
+        content = "export TOR_SKIP_LAUNCH=1\n"
+        with open(path, 'w') as f:
+            f.write(content)
+        f.close()
+        subprocess.run(
+            ['sudo', '/usr/bin/tee', path],
+            input=content.encode(),
+            check=True
+        )
 
 
-#     # We create our own torrc.
-#     torrc_path = "/etc/tor/torrc"
-#
-#
+    # We create our own torrc.
+
     content = info.torrc_text()
     subprocess.run(
-        ["pkexec", "/usr/libexec/write_torrc"],
+        ["pkexec", "/usr/libexec/tor-control-panel/write_torrc.py"],
         input=content,
         text=True,
         check=True
@@ -68,15 +66,15 @@ def configure():
     # )
 
 
-    ## Write apparmor local system_tor.
-    # if not os.path.exists("/etc/apparmor.d/local/system_tor"):
-    #     system_tor_path = "/etc/apparmor.d/local/system_tor"
-    #     content = info.local_system_tor()
-    #     subprocess.run(
-    #         ['sudo', '/usr/bin/tee', system_tor_path],
-    #         input = content.encode(),
-    #         check=True
-    #     )
+    # Write apparmor local system_tor.
+    if not os.path.exists("/etc/apparmor.d/local/system_tor"):
+        system_tor_path = "/etc/apparmor.d/local/system_tor"
+        content = info.local_system_tor()
+        subprocess.run(
+            ['sudo', '/usr/bin/tee', system_tor_path],
+            input = content.encode(),
+            check=True
+        )
 
     ## Reload apparmor
     subprocess.run(
@@ -85,33 +83,37 @@ def configure():
     )
 
 
-    ## webtunnel not in stable repo yet.
-    ## Install  from testing.
-#     if not os.path.exists("/usr/bin/webtunnel-client"):
-#         path = "/etc/apt/sources.list.d/debian-testing.sources"
-#         content = '''Types: deb
-# URIs: http://deb.debian.org/debian
-# Suites: testing
-# Components: main
-# Enabled: yes
-# '''
-#         subprocess.run(
-#             ['sudo', '/usr/bin/tee', path],
-#             input=content.encode(),
-#             check=True
-#         )
-#         subprocess.run(
-#             ['sudo', '/usr/bin/apt', 'update'],
-#             check=True
-#         )
-#         subprocess.run(
-#             ['sudo', '/usr/bin/apt', 'install', '-y', 'webtunnel'],
-#             check=True
-#         )
-#         subprocess.run(
-#             ['sudo', '/usr/bin/rm', path],
-#             check=True
-#         )
+    # webtunnel not in stable repo yet.
+    # Install  from testing.
+    if not os.path.exists("/usr/bin/webtunnel-client"):
+        path = "/etc/apt/sources.list.d/debian-testing.sources"
+        content = '''Types: deb
+URIs: http://deb.debian.org/debian
+Suites: testing
+Components: main
+Enabled: yes
+'''
+        subprocess.run(
+            ['sudo', '/usr/bin/tee', path],
+            input=content.encode(),
+            check=True
+        )
+        subprocess.run(
+            ['sudo', '/usr/bin/apt', 'update'],
+            check=True
+        )
+        subprocess.run(
+            ['sudo', '/usr/bin/apt', 'install', '-y', 'webtunnel'],
+            check=True
+        )
+        subprocess.run(
+            ['sudo', '/usr/bin/apt', 'install', '-y', 'lyrebird'],
+            check=True
+        )
+        subprocess.run(
+            ['sudo', '/usr/bin/rm', path],
+            check=True
+        )
 
 
     # ## Check if Tor Browser is installed.
@@ -151,14 +153,14 @@ def configure():
         check=True
     )
 
-    ## We have to reboot the system.
-    ## Let the user know.
-#     reply= QMessageBox(QMessageBox.NoIcon, 'Resart requested.',
-# '''<p>In order to take into acccount some of the changes listed in "First run configuration",
-# you MUST reboot your system. ''', QMessageBox.Ok)
-#     reply.exec_()
-#
-#     subprocess.run(
-#         ['sudo', '/usr/sbin/reboot'],
-#         check=True
-#     )
+    # We have to reboot the system.
+    # Let the user know.
+    reply= QMessageBox(QMessageBox.NoIcon, 'Resart requested.',
+'''<p>In order to take into acccount some of the changes listed in "First run configuration",
+you MUST reboot your system. ''', QMessageBox.Ok)
+    reply.exec_()
+
+    subprocess.run(
+        ['sudo', '/usr/sbin/reboot'],
+        check=True
+    )

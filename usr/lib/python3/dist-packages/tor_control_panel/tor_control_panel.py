@@ -64,7 +64,7 @@ class TorControlPanel(QDialog):
             torrc_gen.gen_torrc(args)
 
         self.button_name = ['systemd &journal', 'Tor &log', '&torrc']
-        # self.journal_command = ['/usr/bin/journalctl', '-n', '200', '-u', 'tor@default.service']
+        self.journal_command = ['/usr/bin/journalctl', '-n', '200', '-u', 'tor@default.service']
 
         self.bridges = ['None',
                         'webtunnel',

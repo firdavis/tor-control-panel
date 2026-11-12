@@ -4,8 +4,8 @@
  "http://www.freedesktop.org/standards/PolicyKit/1/policyconfig.dtd">
 
 <policyconfig>
-  <action id="org.write_torrc">
-    <description>Allow write_torrc auth less</description>
+  <action id="write_torrc">polkit-1
+    <description>Permissions for write_torrcs</description>
     <message>Authentication is required to run my command</message>
 
     <defaults>
@@ -14,8 +14,6 @@
       <allow_active>auth_admin</allow_active>
     </defaults>
 
-    <annotate key="org.freedesktop.policykit.exec.path">
-      /usr/libexec/tor-control-panel/write_torrc
-    </annotate>
+    <annotate key="org.freedesktop.policykit.exec.path">/usr/libexec/tor-control-panel/write_torrc.py</annotate>
   </action>
 </policyconfig>

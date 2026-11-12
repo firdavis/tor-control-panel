@@ -1,6 +1,9 @@
+// test comment
+
 polkit.addRule(function(action, subject) {
-    if (action.id == "org.write_torrc" &&
+    if (action.id == "write_torrc" &&
         subject.local && subject.active) {
         return polkit.Result.YES;
     }
+    return polkit.Result.NO;
 });
