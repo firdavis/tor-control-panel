@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE policyconfig PUBLIC
+"-//freedesktop//DTD polkit Policy Configuration 1.0//EN"
+"http://www.freedesktop.org/software/polkit/policyconfig-1.dtd">
+
+<policyconfig>
+  <vendor>Tor Control Panel</vendor>
+
+  <action id="org.kicksecure.tor-control-panel.write-torrc">
+    <description>Write the Tor configuration file</description>
+    <message>Authentication is required to modify the Tor configuration</message>
+
+    <defaults>
+      <allow_any>no</allow_any>
+      <allow_inactive>no</allow_inactive>
+      <allow_active>yes</allow_active>
+    </defaults>
+
+    <annotate key="org.freedesktop.policykit.exec.path">/usr/libexec/tor-control-panel/write_torrc.py</annotate>
+  </action>
+</policyconfig>
+
+
+<policyconfig>
+  <vendor>Tor Control Panel</vendor>
+
+  <action id="org.kicksecure.tor-control-panel.debian-configuration">
+    <description>Run configration script at first run after installation</description>
+    <message>Authentication is required to modify Tor Control Panel configuration</message>
+
+    <defaults>
+      <allow_any>no</allow_any>
+      <allow_inactive>no</allow_inactive>
+      <allow_active>yes</allow_active>
+    </defaults>
+
+    <annotate key="org.freedesktop.policykit.exec.path">/usr/libexec/tor-control-panel/debian_configuration.py</annotate>
+  </action>
+</policyconfig>

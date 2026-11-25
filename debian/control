@@ -23,6 +23,8 @@ Depends:
          qtwayland5,
          tor,
          onioncircuits,
+         obfs4proxy,
+         snowflake-client,
          ${misc:Depends}
 Description: Tor Control Graphical User Interface
  .

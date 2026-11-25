@@ -22,6 +22,7 @@ from PyQt5.QtWidgets import QApplication
 ## reference to the currently active thread separately.
 _active_bootstrap_threads = set()
 
+
 class TorBootstrap(QThread):
     signal = pyqtSignal(str, int)
 

@@ -4,6 +4,5 @@ import sys
 path = '/etc/tor/torrc'
 content = sys.stdin.read()
 
-with open(path, 'w') as f:
-    f.write(content)
-
+with open(path, 'w') as torrc:
+    torrc.write(content)

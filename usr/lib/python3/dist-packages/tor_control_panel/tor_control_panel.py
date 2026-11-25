@@ -5,12 +5,11 @@
 
 import sys
 import signal
-
-from . import tor_status, tor_bootstrap, torrc_gen, info
-from .debian_configure import configure
 import os
 
-# from .tor_journal import show_tor_journal
+from . import tor_status, tor_bootstrap, torrc_gen, info
+
+from ../usr.libexec/tor-control-panel import debian_configuration
 
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtCore import Qt
@@ -18,7 +17,6 @@ from PyQt5.QtGui import QCursor, QTextCursor
 from PyQt5.QtWidgets import *
 from subprocess import call, Popen, PIPE
 
-import glob
 import tempfile
 
 from sanitize_string.sanitize_string_lib import sanitize_string
@@ -28,8 +26,12 @@ class TorControlPanel(QDialog):
     def __init__(self):
         super(TorControlPanel, self).__init__()
 
-        if not os.path.exists('/etc/tor/configuration_done'):
-            configure()
+        """
+        This script is actually really useful after the first installation of tor-control-panel.
+        Afterwards, we can afford to run it at every start because the conditions for the
+        configuration are met after the first run.
+        No performance penalty, and the script can be updated whenever required.
+        """
 
         self.setMinimumSize(650, 465)
         self.setWindowFlag(Qt.WindowMinimizeButtonHint)

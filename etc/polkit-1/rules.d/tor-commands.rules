@@ -1,5 +1,3 @@
-// test comment
-
 polkit.addRule(function(action, subject) {
     if (action.id !== "org.freedesktop.systemd1.manage-units") {
         return polkit.Result.NOT_HANDLED;
@@ -11,9 +9,8 @@ polkit.addRule(function(action, subject) {
         return polkit.Result.NOT_HANDLED;
     }
 
-    var allowedVerbs = ["start", "stop", "restart", "reload"];
+    var allowedVerbs = ["start", "stop", "restart", "reload", "journalctl"];
     if (allowedVerbs.indexOf(action.lookup("verb")) !== -1) {
         return polkit.Result.YES;
     }
-    return polkit.Result.NOT_HANDLED;
 });
